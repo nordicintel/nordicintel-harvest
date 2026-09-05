@@ -41,8 +41,9 @@ languages that Table actually has. Scoping the run to a language makes discovery
 that as a matter of fact instead. Two languages are two jobs, two schedules, and two
 independent inventories.
 
-See [docs/operations.md](docs/operations.md) for configuration, a first run, and failure
-diagnosis.
+See [docs/harvest-lifecycle.md](docs/harvest-lifecycle.md) for the runtime lifecycle,
+job states, ownership and recovery, and [docs/operations.md](docs/operations.md) for
+configuration, a first run, and failure diagnosis.
 
 ## Development
 
