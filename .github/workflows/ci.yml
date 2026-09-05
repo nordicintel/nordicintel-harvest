@@ -11,15 +11,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: nordicintel-harvest
-      # [tool.uv.sources] resolves core from a sibling directory. Replace both of these
-      # with a pinned published release once core is on an index.
+      # Core comes from its own tagged release. The adapter is still a sibling checkout
+      # because it has no tag yet; drop this step once it does.
       - uses: actions/checkout@v4
         with:
-          repository: nordicintel/nordicintel-core
-          path: nordicintel-core
+          repository: nordicintel/nordicintel-adapter-pxweb2
+          path: nordicintel-adapter-pxweb2
+          token: ${{ secrets.NORDICINTEL_REPO_TOKEN }}
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
+      # nordicintel-core is a private repository, so the git dependency needs a
+      # credential. A token with read access to it is enough.
+      - run: git config --global url."https://x-access-token:${{ secrets.NORDICINTEL_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
       - run: uv sync --all-extras --dev
         working-directory: nordicintel-harvest
       - run: uv run ruff check .
@@ -51,18 +55,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: nordicintel-harvest
-      # [tool.uv.sources] resolves core from a sibling directory. Replace both of these
-      # with a pinned published release once core is on an index.
+      # Core comes from its own tagged release. The adapter is still a sibling checkout
+      # because it has no tag yet; drop this step once it does.
       - uses: actions/checkout@v4
         with:
-          repository: nordicintel/nordicintel-core
-          path: nordicintel-core
+          repository: nordicintel/nordicintel-adapter-pxweb2
+          path: nordicintel-adapter-pxweb2
+          token: ${{ secrets.NORDICINTEL_REPO_TOKEN }}
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
+      # nordicintel-core is a private repository, so the git dependency needs a
+      # credential. A token with read access to it is enough.
+      - run: git config --global url."https://x-access-token:${{ secrets.NORDICINTEL_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
       - run: uv sync --all-extras --dev
         working-directory: nordicintel-harvest
       - run: uv run python -m nordicintel_core.database migrate upgrade head
+        working-directory: nordicintel-harvest
+      # The pinned core must agree with the database this deployment would run against.
+      - run: uv run python -m nordicintel_core.database migrate check
         working-directory: nordicintel-harvest
       - run: uv run pytest -m postgres
         working-directory: nordicintel-harvest

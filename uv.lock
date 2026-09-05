@@ -443,7 +443,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "nordicintel-core", extras = ["http"], editable = "../nordicintel-core" }]
+requires-dist = [{ name = "nordicintel-core", extras = ["http"], git = "https://github.com/nordicintel/nordicintel-core.git?tag=v0.2.0" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -455,8 +455,8 @@ dev = [
 
 [[package]]
 name = "nordicintel-core"
-version = "0.1.0"
-source = { editable = "../nordicintel-core" }
+version = "0.2.0"
+source = { git = "https://github.com/nordicintel/nordicintel-core.git?tag=v0.2.0#d083fa111504f38d7644a46b3dd85c476b0359d8" }
 dependencies = [
     { name = "jsonschema" },
     { name = "pydantic" },
@@ -475,35 +475,6 @@ migrations = [
     { name = "alembic" },
     { name = "psycopg", extra = ["binary"] },
     { name = "sqlalchemy" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", marker = "extra == 'all'", specifier = ">=1.14,<2" },
-    { name = "alembic", marker = "extra == 'migrations'", specifier = ">=1.14,<2" },
-    { name = "httpx", marker = "extra == 'all'", specifier = ">=0.27,<1" },
-    { name = "httpx", marker = "extra == 'http'", specifier = ">=0.27,<1" },
-    { name = "jsonschema", specifier = ">=4.23,<5" },
-    { name = "psycopg", extras = ["binary"], marker = "extra == 'all'", specifier = ">=3.2,<4" },
-    { name = "psycopg", extras = ["binary"], marker = "extra == 'db'", specifier = ">=3.2,<4" },
-    { name = "psycopg", extras = ["binary"], marker = "extra == 'migrations'", specifier = ">=3.2,<4" },
-    { name = "pydantic", specifier = ">=2.10,<3" },
-    { name = "simplejson", specifier = ">=3.20,<5" },
-    { name = "sqlalchemy", marker = "extra == 'all'", specifier = ">=2.0,<3" },
-    { name = "sqlalchemy", marker = "extra == 'db'", specifier = ">=2.0,<3" },
-    { name = "sqlalchemy", marker = "extra == 'migrations'", specifier = ">=2.0,<3" },
-]
-provides-extras = ["http", "db", "migrations", "all"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "build", specifier = ">=1.2,<2" },
-    { name = "mypy", specifier = ">=1.14,<2" },
-    { name = "pytest", specifier = ">=8.3,<9" },
-    { name = "pytest-asyncio", specifier = ">=0.25,<1" },
-    { name = "ruff", specifier = ">=0.9,<1" },
-    { name = "types-jsonschema", specifier = ">=4.23" },
-    { name = "types-simplejson", specifier = ">=3.20" },
 ]
 
 [[package]]
@@ -530,7 +501,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "nordicintel-adapter-pxweb2", marker = "extra == 'pxweb2'", editable = "../nordicintel-adapter-pxweb2" },
-    { name = "nordicintel-core", extras = ["db", "http", "migrations"], editable = "../nordicintel-core" },
+    { name = "nordicintel-core", extras = ["db", "http", "migrations"], git = "https://github.com/nordicintel/nordicintel-core.git?tag=v0.2.0" },
 ]
 provides-extras = ["pxweb2"]
 

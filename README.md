@@ -46,6 +46,9 @@ diagnosis.
 
 ## Development
 
+`nordicintel-core` is pinned to a tag in a private repository, so `uv` needs credentials
+that can read it — `gh auth login` locally, or a token in CI.
+
 ```bash
 uv sync --extra pxweb2
 uv run ruff check . && uv run mypy

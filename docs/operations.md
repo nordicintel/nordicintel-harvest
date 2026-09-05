@@ -220,3 +220,9 @@ python -m nordicintel_core.database migrate upgrade head
 
 `migrate check` compares the database against `Base.metadata`, not just the revision
 string, so schema drift fails the release rather than a query at runtime.
+
+Core is pinned to an exact version, currently `nordicintel-core==0.2.0` resolved from its
+`v0.2.0` tag. A worker and the database it claims jobs from have to agree about the
+schema, so the migration task and every worker image are built from the same pin. Run
+`nordicintel-bootstrap adapters` and `migrate check` after an upgrade: the first says what
+the process can run, the second says whether the database agrees with it.

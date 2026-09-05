@@ -259,3 +259,40 @@ async def test_cancellation_stops_the_traversal_and_closes_the_running_item() ->
         table = metadata.get_table_by_native(PROVIDER_ID, "TAB1")
         assert table is not None
         assert metadata.get_language(table.table_id, "sv") is not None
+
+
+async def test_the_engine_decides_the_cases_a_marker_cannot_speak_to() -> None:
+    with owner() as session:
+        register(session)
+        # An adapter that always claims "unchanged" must not be able to strand a Table
+        # that has never been accepted, or whose last attempt failed.
+        stubborn = StubAdapter(entries=[TAB1], refresh={"TAB1": False})
+        first = await harvest(session, stubborn)
+        assert stubborn.fetched == [("TAB1", "sv")]
+        assert first.summary.updated == 1
+        # Now it has been accepted, so the adapter's answer is what settles it.
+        stubborn.fetched.clear()
+        second = await harvest(session, stubborn)
+        assert stubborn.fetched == []
+        assert second.summary.skipped == 1
+        # force overrides it whatever the adapter says.
+        third = await harvest(session, stubborn, request=HarvestRequest(language="sv", force=True))
+        assert stubborn.fetched == [("TAB1", "sv")]
+        assert third.summary.updated == 1
+
+
+async def test_a_failed_language_is_refetched_even_when_the_adapter_says_unchanged() -> None:
+    with owner() as session:
+        register(session)
+        await harvest(session, StubAdapter(entries=[TAB1]))
+        await harvest(
+            session, StubAdapter(entries=[TAB1], behaviour={("TAB1", "sv"): UPSTREAM_DOWN})
+        )
+        recovering = StubAdapter(entries=[TAB1], refresh={"TAB1": False})
+        run = await harvest(session, recovering)
+        # An outstanding failure is ours to know about; the marker says nothing about it.
+        assert recovering.fetched == [("TAB1", "sv")]
+        assert run.summary.updated == 1
+        table = MetadataRepository(session).get_table_by_native(PROVIDER_ID, "TAB1")
+        assert table is not None
+        assert MetadataRepository(session).load_language_state(table.table_id)["sv"].failed is False

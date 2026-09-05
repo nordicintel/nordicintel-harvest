@@ -36,6 +36,7 @@ from nordicintel_core.models import (
     DiscoveryScope,
     HarvestJob,
     ItemStatus,
+    LanguageState,
     MetadataFetchResult,
     NordicIntelAdapter,
     ProviderDefinition,
@@ -201,9 +202,7 @@ class HarvestEngine:
                 if table_id is None
                 else self._metadata.load_language_state(table_id).get(self._language)
             )
-            if not await self._control.guard(
-                self._adapter.should_refresh(entry, state, force=self._job.request.force)
-            ):
+            if not await self._needs_fetch(entry, state):
                 # Unchanged. Record that it was looked at, so "current" and "not checked
                 # since the last harvest" stay distinguishable.
                 if table_id is not None and state is not None:
@@ -246,6 +245,25 @@ class HarvestEngine:
             return ItemStatus.FAILED
         self._queue.finish_item(self._job.id, item.id, ItemStatus.UPDATED, table_id=table_id)
         return ItemStatus.UPDATED
+
+    async def _needs_fetch(self, entry: DiscoveryEntry, state: LanguageState | None) -> bool:
+        """Decide whether this Table has to be fetched, asking the adapter only if needed.
+
+        Three cases do not depend on what a marker means, and so are not the adapter's to
+        judge. Two of them are facts about our own database — this language has never been
+        accepted, or its last attempt failed, so there is nothing to compare a marker
+        against. The third is ``force``, which was requested precisely to bypass the
+        comparison. An adapter that answered "unchanged" to any of them would leave a
+        Table permanently unharvested, and it would be unharvested for a reason no
+        diagnostic records.
+        """
+        if self._job.request.force or state is None:
+            return True
+        if state.failed or state.last_harvested_at is None:
+            return True
+        return await self._control.guard(
+            self._adapter.should_refresh(entry, state, force=False)
+        )
 
     def _validate(self, result: MetadataFetchResult, entry: DiscoveryEntry) -> None:
         """Accept exactly the one result that was asked for.
