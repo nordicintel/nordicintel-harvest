@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: nordicintel-harvest
+      # [tool.uv.sources] resolves core from a sibling directory. Replace both of these
+      # with a pinned published release once core is on an index.
+      - uses: actions/checkout@v4
+        with:
+          repository: nordicintel/nordicintel-core
+          path: nordicintel-core
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras --dev
+        working-directory: nordicintel-harvest
+      - run: uv run ruff check .
+        working-directory: nordicintel-harvest
+      - run: uv run mypy
+        working-directory: nordicintel-harvest
+      - run: uv run pytest -m "not postgres"
+        working-directory: nordicintel-harvest
+
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: nordicintel_test
+          POSTGRES_DB: nordicintel
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nordicintel"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NORDICINTEL_DATABASE_URL: postgresql://postgres:nordicintel_test@localhost:5432/nordicintel
+      NORDICINTEL_TEST_DATABASE_URL: postgresql://postgres:nordicintel_test@localhost:5432/nordicintel
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: nordicintel-harvest
+      # [tool.uv.sources] resolves core from a sibling directory. Replace both of these
+      # with a pinned published release once core is on an index.
+      - uses: actions/checkout@v4
+        with:
+          repository: nordicintel/nordicintel-core
+          path: nordicintel-core
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras --dev
+        working-directory: nordicintel-harvest
+      - run: uv run python -m nordicintel_core.database migrate upgrade head
+        working-directory: nordicintel-harvest
+      - run: uv run pytest -m postgres
+        working-directory: nordicintel-harvest

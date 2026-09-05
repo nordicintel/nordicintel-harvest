@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nordicintel-harvest"
+version = "0.1.0"
+description = "Harvest scheduler and worker for NordicIntel"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "NordicIntel" }]
+dependencies = [
+  # Core owns the schema, the repositories and the adapter protocol. Pin an exact tested
+  # release here once core is published; until then [tool.uv.sources] resolves it locally.
+  "nordicintel-core[db,http]==0.1.0",
+]
+
+# Adapter packages are deployment configuration, not dependencies of the worker itself.
+# Install the ones a deployment actually serves, allowlist them with NORDICINTEL_ADAPTERS,
+# and let them register in the 'nordicintel.adapters' entry point group.
+
+[project.scripts]
+nordicintel-worker = "nordicintel_harvest.worker:main"
+nordicintel-scheduler = "nordicintel_harvest.scheduler:main"
+nordicintel-bootstrap = "nordicintel_harvest.bootstrap:main"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.14,<2",
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.25,<1",
+  "ruff>=0.9,<1",
+]
+
+[tool.uv.sources]
+# Development checkout. Replace with a pinned published release before deployment.
+nordicintel-core = { path = "../nordicintel-core", editable = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nordicintel_harvest"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "docs", "CHANGELOG.md", "README.md", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["tests"]
+markers = ["postgres: requires NORDICINTEL_TEST_DATABASE_URL"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["nordicintel_harvest"]
+
+[tool.uv]
+default-groups = ["dev"]
