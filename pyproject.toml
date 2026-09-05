@@ -13,12 +13,17 @@ authors = [{ name = "NordicIntel" }]
 dependencies = [
   # Core owns the schema, the repositories and the adapter protocol. Pin an exact tested
   # release here once core is published; until then [tool.uv.sources] resolves it locally.
-  "nordicintel-core[db,http]==0.1.0",
+  # 'migrations' is included so the release task documented in docs/operations.md runs
+  # from this image, against exactly the core version the workers were built with.
+  "nordicintel-core[db,http,migrations]==0.1.0",
 ]
 
-# Adapter packages are deployment configuration, not dependencies of the worker itself.
-# Install the ones a deployment actually serves, allowlist them with NORDICINTEL_ADAPTERS,
-# and let them register in the 'nordicintel.adapters' entry point group.
+# One extra per adapter family a deployment serves. Adapters are configuration, not a
+# dependency of the worker itself: install the ones this deployment actually harvests,
+# narrow them further with NORDICINTEL_ADAPTERS, and let them register themselves in the
+# 'nordicintel.adapters' entry point group.
+[project.optional-dependencies]
+pxweb2 = ["nordicintel-adapter-pxweb2>=0.1.0"]
 
 [project.scripts]
 nordicintel-worker = "nordicintel_harvest.worker:main"
@@ -34,8 +39,9 @@ dev = [
 ]
 
 [tool.uv.sources]
-# Development checkout. Replace with a pinned published release before deployment.
+# Development checkouts. Replace with pinned published releases before deployment.
 nordicintel-core = { path = "../nordicintel-core", editable = true }
+nordicintel-adapter-pxweb2 = { path = "../nordicintel-adapter-pxweb2", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/nordicintel_harvest"]

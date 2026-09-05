@@ -187,6 +187,33 @@ async def test_a_single_table_job_addresses_the_upstream_identity_and_retires_no
         assert {native for native, _ in narrowed.fetched} == {"TAB1"}
 
 
+async def test_a_language_a_table_does_not_exist_in_is_never_fetched() -> None:
+    with owner() as session:
+        register(session)
+        # TAB2 is published in Swedish only, which upstream reports as a missing table
+        # rather than an empty answer, so asking for English would fail it on every run.
+        swedish_only = DiscoveryEntry(native_table_id="TAB2", available_languages=["sv"])
+        adapter = StubAdapter(entries=[TAB1, swedish_only])
+        run = await harvest(session, adapter)
+        assert (run.summary.updated, run.summary.failed) == (2, 0)
+        assert sorted(adapter.fetched) == [
+            ("TAB1", "en"),
+            ("TAB1", "sv"),
+            ("TAB2", "sv"),
+        ]
+        metadata = MetadataRepository(session)
+        table = metadata.get_table_by_native(PROVIDER_ID, "TAB2")
+        assert table is not None
+        assert table.availability_status.value == "available"
+        assert list(metadata.load_language_state(table.table_id)) == ["sv"]
+
+        # The floor that forces a never-harvested language must not reintroduce it.
+        again = StubAdapter(entries=[TAB1, swedish_only], refresh={"TAB1": [], "TAB2": []})
+        second = await harvest(session, again)
+        assert again.fetched == []
+        assert second.summary.skipped == 2
+
+
 async def test_a_result_for_the_wrong_table_is_a_failure_not_a_silent_skip() -> None:
     with owner() as session:
         register(session)

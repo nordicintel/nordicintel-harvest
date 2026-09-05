@@ -29,7 +29,7 @@ Every variable is read once at startup from the process environment.
 | `NORDICINTEL_SCHEDULER_POLL_SECONDS` | `15` | Scheduler tick. |
 | `NORDICINTEL_SHUTDOWN_BUDGET_SECONDS` | `30` | How long a signalled worker may spend finishing its job. |
 | `NORDICINTEL_HTTP_TIMEOUT_SECONDS` | `30` | Per-request upstream timeout. |
-| `NORDICINTEL_REQUEST_INTERVAL_SECONDS` | `0` | Minimum spacing between requests, per adapter instance. |
+| `NORDICINTEL_REQUEST_INTERVAL_SECONDS` | `0` | Default minimum spacing between requests, per running job. |
 | `NORDICINTEL_STATEMENT_TIMEOUT_SECONDS` | `30` | `statement_timeout` on every connection this process opens. |
 | `NORDICINTEL_LOG_LEVEL` | `INFO` | Standard logging level. |
 
@@ -46,6 +46,17 @@ The database endpoint must not be a transaction pooler. Ownership is a physical 
 `harvest_job.owner_backend_pid` and session-scoped advisory locks are both silently lost if
 something hands the process a different connection.
 
+An upstream quota belongs to the provider, not to the process, so a Provider may state
+its own spacing and it wins over the default:
+
+```json
+{ "config": { "request_interval_seconds": 0.34 } }
+```
+
+SCB publishes 30 calls per 10 seconds, which is where that 0.34 comes from. The spacing is
+per running job, and a job holds its provider lock for its whole run, so one provider is
+never being asked more than one question at a time by this deployment.
+
 Secrets are never stored in the database. A Provider's `secret_refs` maps the name the
 adapter asks for to the name of an environment variable the deployment supplies:
 
@@ -58,12 +69,18 @@ never the value.
 
 ## Installing an adapter
 
+Adapters are installed as extras, one per adapter family a deployment serves:
+
+```bash
+pip install "nordicintel-harvest[pxweb2]"
+```
+
 An adapter package registers its `AdapterFactory` under the name Providers use as their
 `adapter_type`:
 
 ```toml
 [project.entry-points."nordicintel.adapters"]
-pxweb = "nordicintel_adapter_pxweb:factory"
+pxweb2 = "nordicintel_adapter_pxweb2:factory"
 ```
 
 The registered object may be an instance or a class; a class is instantiated once at
@@ -82,10 +99,17 @@ An empty list here with a configured Provider is the usual cause of jobs failing
 export NORDICINTEL_DATABASE_URL=postgresql://user:pass@host/nordicintel
 
 python -m nordicintel_core.database migrate upgrade head
+nordicintel-bootstrap adapters                              # pxweb2 should be listed
 nordicintel-bootstrap provider upsert providers/scb.json
-nordicintel-bootstrap harvest enqueue scb --languages sv,en
+nordicintel-bootstrap harvest enqueue scb
 nordicintel-worker
 ```
+
+`providers/scb.json` in this repository is a working Statistics Sweden definition. Its
+`config.table_ids` restricts the run to a handful of tables, which is what makes a first
+run finish in seconds rather than working through 5,253 of them. Remove that key for a
+real harvest; while it is present the inventory is not authoritative and nothing is ever
+retired.
 
 Then look at what happened:
 
@@ -157,6 +181,11 @@ reports a request, not a completed stop.
 4. Nothing retired unexpectedly? Absence is only decided by a complete provider-wide
    inventory. A failed or partial discovery retires nothing, and a Table that reappears in
    a later inventory is restored even if its metadata was unchanged.
+5. A Table skipped in a language it should have? A Table is only fetched in the languages
+   its adapter reports it as having. Upstream catalogues are not the same size in every
+   language, and a language a Table was never published in is an error rather than an
+   empty answer, so that bound is absolute: the retry a never-harvested language is
+   normally owed does not override it.
 
 Diagnostics never contain URLs, request bodies or credentials: only exception types this
 project and core define contribute their own text, and everything else is reported by

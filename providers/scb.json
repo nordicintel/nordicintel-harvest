@@ -1,0 +1,18 @@
+{
+  "id": "scb",
+  "label": "Statistiska centralbyrån",
+  "description": "Statistics Sweden produces official statistics for Sweden.",
+  "website": "https://www.scb.se/",
+  "region": "se",
+  "adapter_type": "pxweb2",
+  "config": {
+    "base_api_url": "https://statistikdatabasen.scb.se/api/v2",
+    "languages": ["sv", "en"],
+    "default_language": "sv",
+    "page_size": 1000,
+    "request_interval_seconds": 0.34,
+    "table_ids": ["TAB4707", "TAB66", "TAB70", "TAB301", "TAB1267", "TAB5444"]
+  },
+  "secret_refs": {},
+  "enabled": true
+}

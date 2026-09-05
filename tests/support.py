@@ -33,11 +33,28 @@ from sqlalchemy.orm import Session
 
 PROVIDER_ID = "scb"
 
+# Snapshotted at import: tests that exercise the operator commands set
+# NORDICINTEL_DATABASE_URL themselves, and the guard below is about the database this
+# machine's processes were pointed at before any test ran.
+_CONFIGURED_DATABASE_URL = os.environ.get("NORDICINTEL_DATABASE_URL")
+
 
 def database_url() -> str:
+    """The database these tests are allowed to destroy.
+
+    Every test starts by truncating the schema, so this must be a throwaway database. It
+    is deliberately refused when it names the same database the processes are configured
+    against: pointing the suite at a working catalogue empties it, and the failure is
+    silent because an empty catalogue is a perfectly valid state.
+    """
     value = os.environ.get("NORDICINTEL_TEST_DATABASE_URL")
     if not value:
         pytest.skip("NORDICINTEL_TEST_DATABASE_URL is not configured")
+    if value == _CONFIGURED_DATABASE_URL:
+        pytest.fail(
+            "NORDICINTEL_TEST_DATABASE_URL must not be the database the worker uses: "
+            "these tests truncate it"
+        )
     return value
 
 

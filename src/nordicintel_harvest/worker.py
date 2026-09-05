@@ -21,6 +21,7 @@ import sys
 from collections.abc import Mapping
 from contextlib import suppress
 from dataclasses import dataclass
+from decimal import Decimal
 from importlib.metadata import PackageNotFoundError, version
 from types import TracebackType
 
@@ -205,6 +206,9 @@ class Worker:
             "no summary" if summary is None else _describe(summary),
         )
 
+    def _request_interval(self, provider: ProviderDefinition) -> float:
+        return _request_interval(self._settings, provider)
+
     def _observe_stop(self, queue: HarvestRepository, job: HarvestJob) -> bool | None:
         """Ask the database whether this session still owns the job, and whether to stop.
 
@@ -228,10 +232,7 @@ class Worker:
             factory = self._registry.get(provider.adapter_type)
             secrets = resolve_secrets(provider, self._environment)
             client = httpx.AsyncClient(timeout=self._settings.http_timeout_seconds)
-            http = HttpClient(
-                client,
-                minimum_interval_seconds=self._settings.minimum_request_interval_seconds,
-            )
+            http = HttpClient(client, minimum_interval_seconds=self._request_interval(provider))
             adapter = await factory.create(provider, secrets, http)
         except Exception as exc:
             if client is not None:
@@ -240,6 +241,29 @@ class Worker:
                 diagnostics.diagnose(exc, stage=DiagnosticStage.DISCOVERY)
             ) from exc
         return _Attempt(provider=provider, adapter=adapter, client=client)
+
+
+REQUEST_INTERVAL_KEY = "request_interval_seconds"
+
+
+def _request_interval(settings: Settings, provider: ProviderDefinition) -> float:
+    """How far apart this Provider's requests must be.
+
+    Upstream quotas are the Provider's property, not the worker's: one publisher allows
+    three calls a second and the next allows one every two. The worker builds the HTTP
+    client, so the Provider row is where that number has to be read from, and the process
+    default only applies to Providers that do not state one.
+    """
+    if REQUEST_INTERVAL_KEY not in provider.config:
+        return settings.minimum_request_interval_seconds
+    value = provider.config[REQUEST_INTERVAL_KEY]
+    # Core decodes JSONB with exact decimals, so a fractional interval arrives as a
+    # Decimal even though it was written as a JSON number.
+    if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)) or value < 0:
+        raise ConfigurationError(
+            f"provider.config.{REQUEST_INTERVAL_KEY} must be a non-negative number"
+        )
+    return float(value)
 
 
 def _describe(summary: HarvestSummary) -> str:

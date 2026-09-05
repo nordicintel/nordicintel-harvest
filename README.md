@@ -34,3 +34,21 @@ pxweb = "nordicintel_adapter_pxweb:factory"
 
 See [docs/operations.md](docs/operations.md) for configuration, a first run, and failure
 diagnosis.
+
+## Development
+
+```bash
+uv sync --extra pxweb2
+uv run ruff check . && uv run mypy
+uv run pytest -m "not postgres"
+
+# Ownership, cancellation and recovery need real backends.
+export NORDICINTEL_TEST_DATABASE_URL=postgresql://postgres:pw@localhost:5432/nordicintel_test
+uv run python -m nordicintel_core.database migrate upgrade head
+uv run pytest
+```
+
+`NORDICINTEL_TEST_DATABASE_URL` must name a **throwaway** database: every database test
+truncates the schema first. The suite refuses to run when it names the same database as
+`NORDICINTEL_DATABASE_URL`, because emptying a working catalogue fails silently — an
+empty catalogue is a perfectly valid state.

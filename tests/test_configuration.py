@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 from nordicintel_core.errors import (
     ConfigurationError,
@@ -15,6 +17,7 @@ from nordicintel_harvest import diagnostics
 from nordicintel_harvest.registry import AdapterRegistry
 from nordicintel_harvest.secrets import resolve_secrets
 from nordicintel_harvest.settings import Settings, load_settings
+from nordicintel_harvest.worker import _request_interval
 
 BASE_ENV = {"NORDICINTEL_DATABASE_URL": "postgresql://localhost/nordicintel"}
 
@@ -121,3 +124,21 @@ def test_a_diagnostic_that_cannot_be_trimmed_still_names_its_code() -> None:
 def test_settings_reject_an_empty_adapter_allowlist() -> None:
     with pytest.raises(ConfigurationError, match="at least one adapter"):
         Settings(database_url="postgresql://localhost/x", adapters=frozenset())
+
+
+def test_a_provider_states_its_own_request_spacing() -> None:
+    settings = load_settings({**BASE_ENV, "NORDICINTEL_REQUEST_INTERVAL_SECONDS": "1.5"})
+    assert _request_interval(settings, provider()) == 1.5
+    # An upstream quota belongs to the Provider, so its own value wins over the default.
+    fast = provider()
+    assert _request_interval(settings, fast.model_copy(update={
+        "config": {**fast.config, "request_interval_seconds": 0.34}
+    })) == 0.34
+    # JSONB round-trips a fractional number back as an exact Decimal, not a float.
+    assert _request_interval(settings, fast.model_copy(update={
+        "config": {**fast.config, "request_interval_seconds": Decimal("0.34")}
+    })) == 0.34
+    with pytest.raises(ConfigurationError, match="non-negative number"):
+        _request_interval(settings, fast.model_copy(update={
+            "config": {**fast.config, "request_interval_seconds": "fast"}
+        }))

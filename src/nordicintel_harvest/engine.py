@@ -198,7 +198,8 @@ class HarvestEngine:
         accepted = 0
         try:
             state = {} if table_id is None else self._metadata.load_language_state(table_id)
-            selected = await self._select_languages(entry, state, languages)
+            candidates = self._candidate_languages(entry, languages)
+            selected = await self._select_languages(entry, state, candidates)
             for language in selected:
                 self._control.raise_if_stopping()
                 stage = DiagnosticStage.FETCH_METADATA
@@ -227,7 +228,7 @@ class HarvestEngine:
                 for failure in failures:
                     if failure.language not in recorded:
                         self._record_failure(table_id, failure)
-                for language in languages:
+                for language in candidates:
                     if language not in selected and language in state:
                         self._metadata.mark_checked(self._job.id, table_id, language)
         except HarvestStopped:
@@ -263,13 +264,29 @@ class HarvestEngine:
             language=failure.language,
         )
 
+    def _candidate_languages(
+        self, entry: DiscoveryEntry, languages: Sequence[str]
+    ) -> list[str]:
+        """The languages this Table could be fetched in at all.
+
+        ``available_languages`` is a statement about existence, not about freshness: a
+        Table that was never published in a language cannot be fetched in it, and asking
+        is an upstream error rather than an empty answer. That makes this bound absolute.
+        Everything below chooses within it. An adapter that says nothing leaves the
+        requested languages standing.
+        """
+        if entry.available_languages is None:
+            return list(languages)
+        available = set(entry.available_languages)
+        return [language for language in languages if language in available]
+
     async def _select_languages(
         self,
         entry: DiscoveryEntry,
         state: Mapping[str, LanguageState],
-        languages: Sequence[str],
+        candidates: Sequence[str],
     ) -> list[str]:
-        """Decide which languages this Table is fetched in.
+        """Decide which of the candidate languages this Table is fetched in.
 
         The adapter decides what its own markers mean. It cannot decide the cases that do
         not depend on a marker at all: a language with no successful harvest has nothing
@@ -280,16 +297,16 @@ class HarvestEngine:
         """
         chosen = await self._control.guard(
             self._adapter.languages_to_refresh(
-                entry, dict(state), list(languages), force=self._job.request.force
+                entry, dict(state), list(candidates), force=self._job.request.force
             )
         )
         wanted = {language.strip().lower() for language in chosen}
-        for language in languages:
+        for language in candidates:
             stored = state.get(language)
             unusable = stored is None or stored.failed or stored.last_harvested_at is None
             if unusable or self._job.request.force:
                 wanted.add(language)
-        return [language for language in languages if language in wanted]
+        return [language for language in candidates if language in wanted]
 
     def _single_result(
         self,
