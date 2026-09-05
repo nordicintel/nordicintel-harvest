@@ -160,73 +160,72 @@ Behaviour = MetadataFetchResult | BaseException | Callable[[], Any]
 
 
 class StubAdapter:
-    """A scripted adapter that records everything the engine asked it for."""
+    """A scripted adapter that records everything the engine asked it for.
+
+    Behaviour is keyed by ``(native_table_id, language)`` because that pair is the unit
+    of work: one Table, in the one language its job is for.
+    """
 
     def __init__(
         self,
         *,
         entries: Sequence[DiscoveryEntry],
         languages: Sequence[str] = ("sv", "en"),
-        authoritative: bool = True,
+        catalogues: Mapping[str, Sequence[DiscoveryEntry]] | None = None,
         provider_id: str = PROVIDER_ID,
-        refresh: Mapping[str, Sequence[str]] | None = None,
+        refresh: Mapping[str, bool] | None = None,
         behaviour: Mapping[tuple[str, str], Behaviour] | None = None,
         discovery_error: BaseException | None = None,
         scope_override: DiscoveryScope | None = None,
     ) -> None:
         self.entries = list(entries)
         self.languages = list(languages)
-        self.authoritative = authoritative
-        self.provider_id = provider_id
-        # None means "the adapter has no opinion", which is the normal case: the engine's
-        # own floor still forces languages that have never been harvested successfully.
-        self.refresh = (
+        # A per-language catalogue, for the case the whole design turns on: a Table that
+        # exists in one language and simply is not in the listing of another.
+        self.catalogues = (
             None
-            if refresh is None
-            else {key: list(value) for key, value in refresh.items()}
+            if catalogues is None
+            else {key: list(value) for key, value in catalogues.items()}
         )
+        self.provider_id = provider_id
+        # None means "the adapter has no opinion", i.e. everything needs refreshing.
+        self.refresh = None if refresh is None else dict(refresh)
         self.behaviour = dict(behaviour or {})
         self.discovery_error = discovery_error
         self.scope_override = scope_override
         self.discovered: list[DiscoveryScope] = []
         self.fetched: list[tuple[str, str]] = []
-        self.compared: list[tuple[str, tuple[str, ...]]] = []
+        self.compared: list[tuple[str, str]] = []
 
-    async def resolve_languages(self, requested: Sequence[str] | None) -> list[str]:
-        if requested is None:
-            return list(self.languages)
-        return [language for language in self.languages if language in set(requested)]
+    async def supported_languages(self) -> list[str]:
+        return list(self.languages)
+
+    def _catalogue(self, language: str) -> list[DiscoveryEntry]:
+        if self.catalogues is None:
+            return list(self.entries)
+        return list(self.catalogues.get(language, []))
 
     async def discover(self, scope: DiscoveryScope) -> DiscoveryResult:
         self.discovered.append(scope)
         if self.discovery_error is not None:
             raise self.discovery_error
         return DiscoveryResult(
-            scope=self.scope_override or scope,
-            entries=list(self.entries),
-            authoritative=self.authoritative,
+            scope=self.scope_override or scope, entries=self._catalogue(scope.language)
         )
 
-    async def languages_to_refresh(
-        self,
-        entry: DiscoveryEntry,
-        stored: Mapping[str, LanguageState],
-        requested: Sequence[str],
-        *,
-        force: bool,
-    ) -> list[str]:
-        self.compared.append((entry.native_table_id, tuple(stored)))
-        if force:
-            return list(requested)
+    async def should_refresh(
+        self, entry: DiscoveryEntry, stored: LanguageState | None, *, force: bool
+    ) -> bool:
+        self.compared.append((entry.native_table_id, "none" if stored is None else "stored"))
+        if force or stored is None or stored.last_harvested_at is None or stored.failed:
+            return True
         if self.refresh is None:
-            return list(requested)
-        return list(self.refresh.get(entry.native_table_id, []))
+            return True
+        return self.refresh.get(entry.native_table_id, True)
 
     async def fetch_metadata(
-        self, entry: DiscoveryEntry, languages: Sequence[str]
-    ) -> list[MetadataFetchResult]:
-        assert len(languages) == 1, "the engine must request one language per call"
-        language = languages[0]
+        self, entry: DiscoveryEntry, language: str
+    ) -> MetadataFetchResult:
         self.fetched.append((entry.native_table_id, language))
         scripted = self.behaviour.get((entry.native_table_id, language))
         if isinstance(scripted, BaseException):
@@ -235,10 +234,10 @@ class StubAdapter:
             produced = scripted()
             if inspect.isawaitable(produced):
                 produced = await produced
-            return [produced]
+            return produced
         if scripted is not None:
-            return [scripted]
-        return [fetch_result(entry.native_table_id, language, provider_id=self.provider_id)]
+            return scripted
+        return fetch_result(entry.native_table_id, language, provider_id=self.provider_id)
 
     async def fetch_data(
         self, native_table_id: str, selection: ExplicitSelection
@@ -274,13 +273,14 @@ def start_job(
     request: Any = None,
     *,
     provider_id: str = PROVIDER_ID,
+    language: str = "sv",
 ) -> Any:
     """Enqueue and claim one job on this session, as a worker would."""
     from nordicintel_core.database import HarvestRepository
     from nordicintel_core.models import HarvestRequest
 
     queue = HarvestRepository(session)
-    queued = queue.enqueue(provider_id, request or HarvestRequest())
+    queued = queue.enqueue(provider_id, request or HarvestRequest(language=language))
     claimed = queue.claim()
     assert claimed is not None and claimed.id == queued.id
     return claimed
@@ -298,6 +298,7 @@ async def harvest(
     session: Session,
     adapter: StubAdapter,
     *,
+    language: str = "sv",
     request: Any = None,
     control_factory: Callable[[Any, int], Any] | None = None,
     definition: ProviderDefinition | None = None,
@@ -315,7 +316,7 @@ async def harvest(
     from nordicintel_harvest.engine import HarvestEngine
     from nordicintel_harvest.errors import HarvestStopped, JobFailed
 
-    job = start_job(session, request, provider_id=provider_id)
+    job = start_job(session, request, provider_id=provider_id, language=language)
     queue = HarvestRepository(session)
     control = (
         control_factory(queue, job.id)

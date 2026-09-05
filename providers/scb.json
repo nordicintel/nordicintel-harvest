@@ -7,11 +7,8 @@
   "adapter_type": "pxweb2",
   "config": {
     "base_api_url": "https://statistikdatabasen.scb.se/api/v2",
-    "languages": ["sv", "en"],
-    "default_language": "sv",
     "page_size": 1000,
-    "request_interval_seconds": 0.34,
-    "table_ids": ["TAB4707", "TAB66", "TAB70", "TAB301", "TAB1267", "TAB5444"]
+    "request_interval_seconds": 0.34
   },
   "secret_refs": {},
   "enabled": true

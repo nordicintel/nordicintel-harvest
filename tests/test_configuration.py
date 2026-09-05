@@ -5,11 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
-from nordicintel_core.errors import (
-    ConfigurationError,
-    UpstreamResponseError,
-    UpstreamTransportError,
-)
+from nordicintel_core.errors import ConfigurationError, UpstreamResponseError
 from nordicintel_core.models import DiagnosticStage
 from support import StubAdapter, StubFactory, provider
 
@@ -101,18 +97,17 @@ def test_diagnostics_keep_upstream_codes_and_hide_unknown_messages() -> None:
 
 
 def test_oversized_details_are_trimmed_rather_than_lost() -> None:
-    failures = [
-        diagnostics.language_failure(
-            f"l{index}",
-            DiagnosticStage.FETCH_METADATA,
-            UpstreamTransportError("x" * 900, code="upstream_transport"),
-        )
-        for index in range(400)
-    ]
-    aggregated = diagnostics.item_failure(failures)
-    assert aggregated.code == "upstream_transport"
-    assert len(aggregated.details["languages"]) < len(failures)
-    assert "language(s) failed" in aggregated.message
+    # A diagnostic that fails validation loses the explanation of a failure that already
+    # happened, so an oversized one is trimmed down instead of dropped.
+    aggregated = diagnostics.build(
+        "upstream_response",
+        "The upstream rejected this table.",
+        stage=DiagnosticStage.FETCH_METADATA,
+        details={"attempts": ["x" * 900 for _ in range(400)]},
+    )
+    assert aggregated.code == "upstream_response"
+    assert len(aggregated.details["attempts"]) < 400
+    assert aggregated.message == "The upstream rejected this table."
 
 
 def test_a_diagnostic_that_cannot_be_trimmed_still_names_its_code() -> None:

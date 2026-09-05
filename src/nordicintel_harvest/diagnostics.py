@@ -14,8 +14,7 @@ its type name. Everything is then trimmed to fit before the model is built.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping
 from typing import Any
 
 from nordicintel_core.errors import (
@@ -28,25 +27,6 @@ from nordicintel_core.models import Diagnostic, DiagnosticStage
 
 MAX_DIAGNOSTIC_BYTES = 16 * 1024
 _MAX_MESSAGE_CHARS = 1000
-_MAX_LANGUAGE_DETAILS = 20
-
-
-@dataclass(frozen=True, slots=True)
-class LanguageFailure:
-    """One language of one Table that could not be harvested during this attempt."""
-
-    language: str
-    stage: DiagnosticStage
-    code: str
-    message: str
-
-    def as_details(self) -> dict[str, str]:
-        return {
-            "language": self.language,
-            "stage": self.stage.value,
-            "code": self.code,
-            "message": self.message,
-        }
 
 
 def describe(exc: BaseException) -> tuple[str, str]:
@@ -86,30 +66,6 @@ def diagnose(
     return build(code, message, stage=stage, details=details)
 
 
-def language_failure(language: str, stage: DiagnosticStage, exc: BaseException) -> LanguageFailure:
-    """Record one language's failure for later aggregation onto its item."""
-    code, message = describe(exc)
-    return LanguageFailure(language=language, stage=stage, code=code, message=message)
-
-
-def item_failure(failures: Sequence[LanguageFailure]) -> Diagnostic:
-    """Summarize every language that failed for one Table into that item's diagnostic.
-
-    The item carries one diagnostic, but a Table can fail in one language and succeed in
-    another, so the per-language records go into ``details`` where they stay attributable.
-    """
-    if not failures:
-        raise ValueError("an item failure requires at least one language failure")
-    codes = sorted({failure.code for failure in failures})
-    languages = [failure.language for failure in failures]
-    return build(
-        codes[0] if len(codes) == 1 else "language_failures",
-        f"{len(failures)} language(s) failed: {', '.join(languages)}.",
-        stage=failures[0].stage if len({f.stage for f in failures}) == 1 else None,
-        details={"languages": [failure.as_details() for failure in failures]},
-    )
-
-
 def interrupted(reason: str) -> Diagnostic:
     """Build the diagnostic for work stopped by a cancellation rather than a fault."""
     return build("harvest_interrupted", reason, stage=DiagnosticStage.INTERRUPTED)
@@ -146,13 +102,12 @@ def build(
 
 
 def _shrink(payload: dict[str, Any]) -> dict[str, Any]:
-    """Discard the largest remaining detail, halving a language list before dropping it."""
-    languages = payload.get("languages")
-    if isinstance(languages, list) and len(languages) > 1:
-        return {**payload, "languages": languages[: len(languages) // 2]}
+    """Discard the largest remaining detail, halving a long list before dropping it."""
+    for key, value in payload.items():
+        if isinstance(value, list) and len(value) > 1:
+            return {**payload, key: value[: len(value) // 2]}
     largest = max(payload, key=lambda key: len(repr(payload[key])))
-    remaining = {key: value for key, value in payload.items() if key != largest}
-    return remaining
+    return {key: value for key, value in payload.items() if key != largest}
 
 
 def _size(diagnostic: Diagnostic) -> int:
@@ -175,8 +130,3 @@ def _shorten(text: str) -> str:
 
 def _snake(name: str) -> str:
     return "".join(f"_{part.lower()}" if part.isupper() else part for part in name).lstrip("_")
-
-
-def limit_language_details(failures: Sequence[LanguageFailure]) -> list[LanguageFailure]:
-    """Cap how many language records one item reports, oldest first."""
-    return list(failures[:_MAX_LANGUAGE_DETAILS])

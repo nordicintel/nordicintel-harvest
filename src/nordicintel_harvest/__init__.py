@@ -1,7 +1,6 @@
 """Harvest scheduler and worker built on the core repositories and adapter protocol."""
 
 from .control import JobControl
-from .diagnostics import LanguageFailure
 from .engine import HarvestEngine, HarvestSummary
 from .errors import HarvestStopped, JobFailed
 from .registry import ENTRY_POINT_GROUP, AdapterRegistry
@@ -18,7 +17,6 @@ __all__ = [
     "HarvestSummary",
     "JobControl",
     "JobFailed",
-    "LanguageFailure",
     "Settings",
     "Worker",
     "load_settings",

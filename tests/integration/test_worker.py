@@ -71,7 +71,7 @@ def build_worker(adapter: StubAdapter, **overrides: object) -> tuple[Worker, Stu
 async def test_a_worker_harvests_a_queued_job_and_releases_its_provider() -> None:
     with owner() as session:
         register(session, secret_refs={"api_key": "SCB_API_KEY"})
-        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest())
+        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
 
     factory = StubFactory(StubAdapter(entries=[TAB1, TAB2]))
     worker = Worker(
@@ -93,14 +93,14 @@ async def test_a_worker_harvests_a_queued_job_and_releases_its_provider() -> Non
         assert stored is not None
         assert MetadataRepository(session).search("Befolkning")[0].table_id == stored.table_id
         # The provider lock went with the closed session, so the next job can claim it.
-        assert queue.enqueue(PROVIDER_ID, HarvestRequest(force=True)) is not None
+        assert queue.enqueue(PROVIDER_ID, HarvestRequest(language="sv", force=True)) is not None
         assert queue.claim() is not None
 
 
 async def test_a_missing_adapter_fails_the_job_with_a_diagnostic() -> None:
     with owner() as session:
         ProviderRepository(session).upsert(provider(adapter_type="pxweb"))
-        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest())
+        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
 
     worker, _ = build_worker(StubAdapter(entries=[TAB1]))
     try:
@@ -119,7 +119,7 @@ async def test_a_missing_adapter_fails_the_job_with_a_diagnostic() -> None:
 async def test_a_missing_secret_fails_the_job_without_naming_the_value() -> None:
     with owner() as session:
         register(session, secret_refs={"api_key": "SCB_API_KEY"})
-        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest())
+        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
 
     worker, _ = build_worker(StubAdapter(entries=[TAB1]))
     try:
@@ -139,9 +139,9 @@ async def test_two_workers_never_run_one_provider_at_the_same_time() -> None:
         register(session)
         register(session, "ssb")
         queue = HarvestRepository(session)
-        queue.enqueue(PROVIDER_ID, HarvestRequest())
-        queue.enqueue(PROVIDER_ID, HarvestRequest(force=True))
-        queue.enqueue("ssb", HarvestRequest())
+        queue.enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
+        queue.enqueue(PROVIDER_ID, HarvestRequest(language="sv", force=True))
+        queue.enqueue("ssb", HarvestRequest(language="sv"))
 
     workers = [build_worker(StubAdapter(entries=[TAB1]))[0] for _ in range(2)]
     try:
@@ -165,7 +165,7 @@ async def test_two_workers_never_run_one_provider_at_the_same_time() -> None:
 async def test_a_cancelled_job_stops_promptly_and_finalizes_as_cancelled() -> None:
     with owner() as session:
         register(session)
-        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest())
+        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
 
     async def cancel_then_block() -> object:
         with owner() as canceller:
@@ -199,7 +199,7 @@ async def test_a_cancelled_job_stops_promptly_and_finalizes_as_cancelled() -> No
 async def test_shutting_the_worker_down_cancels_the_job_it_is_running() -> None:
     with owner() as session:
         register(session)
-        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest())
+        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
 
     stop = asyncio.Event()
 
@@ -227,7 +227,7 @@ async def test_shutting_the_worker_down_cancels_the_job_it_is_running() -> None:
 async def test_a_job_whose_owner_disappears_is_recovered_not_resumed() -> None:
     with owner() as session:
         register(session)
-        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest())
+        job = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
 
     with owner() as doomed:
         queue = HarvestRepository(doomed)
@@ -278,16 +278,17 @@ async def test_a_second_scheduler_refuses_to_start() -> None:
     assert started.is_set()
 
 
-async def test_the_scheduler_enqueues_due_work_and_skips_a_busy_provider() -> None:
+async def test_the_scheduler_enqueues_each_due_language_without_stacking() -> None:
     with owner() as session:
         register(session)
-        ScheduleRepository(session).upsert(
-            PROVIDER_ID,
-            enabled=True,
-            every_seconds=3600,
-            next_run_at=datetime.now(UTC),
-            request=HarvestRequest(),
-        )
+        for language in ("sv", "en"):
+            ScheduleRepository(session).upsert(
+                PROVIDER_ID,
+                enabled=True,
+                every_seconds=3600,
+                next_run_at=datetime.now(UTC),
+                request=HarvestRequest(language=language),
+            )
 
     stop = asyncio.Event()
 
@@ -300,9 +301,11 @@ async def test_the_scheduler_enqueues_due_work_and_skips_a_busy_provider() -> No
     with owner() as session:
         queue = HarvestRepository(session)
         jobs = queue.list_jobs()
-        # One tick enqueued the due schedule; later ticks found the Provider already
-        # queued and advanced the schedule instead of stacking a second job on it.
-        assert len(jobs) == 1
-        assert jobs[0].status is JobStatus.QUEUED
-        schedule = ScheduleRepository(session).get(PROVIDER_ID)
-        assert schedule is not None and schedule.next_run_at > datetime.now(UTC)
+        # Both languages were due, and they are different work: one job each. Later ticks
+        # found each already queued and advanced its schedule rather than stacking on it.
+        assert {job.request.language for job in jobs} == {"sv", "en"}
+        assert len(jobs) == 2
+        assert {job.status for job in jobs} == {JobStatus.QUEUED}
+        for language in ("sv", "en"):
+            schedule = ScheduleRepository(session).get(PROVIDER_ID, language)
+            assert schedule is not None and schedule.next_run_at > datetime.now(UTC)

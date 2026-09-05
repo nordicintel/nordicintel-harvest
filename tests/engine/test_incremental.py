@@ -1,8 +1,8 @@
-"""Incremental refresh, per-language outcomes, and absence handling.
+"""Incremental refresh and per-language outcomes.
 
 These run against a real PostgreSQL because every decision under test is read back out of
-the database: which languages have succeeded, which are still failing, and which Tables
-the last authoritative inventory contained.
+the database: which languages have succeeded, which are still failing, and what a second
+run therefore does.
 """
 
 from __future__ import annotations
@@ -40,19 +40,20 @@ UPSTREAM_DOWN = UpstreamResponseError(
 )
 
 
-async def test_first_run_harvests_every_language_and_a_second_run_skips() -> None:
+async def test_a_first_run_harvests_the_catalogue_and_a_second_run_skips() -> None:
     with owner() as session:
         register(session)
         first = await harvest(session, StubAdapter(entries=[TAB1, TAB2]))
         assert (first.summary.updated, first.summary.skipped, first.summary.failed) == (2, 0, 0)
+        assert first.summary.language == "sv"
         metadata = MetadataRepository(session)
         stored = metadata.get_table_by_native(PROVIDER_ID, "TAB1")
-        assert stored is not None and stored.retired is False
+        assert stored is not None
         assert metadata.get_language(stored.table_id, "sv") is not None
-        assert metadata.get_language(stored.table_id, "en") is not None
+        # Only the job's own language was harvested.
+        assert metadata.get_language(stored.table_id, "en") is None
 
-        # The adapter now reports its markers as unchanged for both Tables.
-        unchanged = StubAdapter(entries=[TAB1, TAB2], refresh={"TAB1": [], "TAB2": []})
+        unchanged = StubAdapter(entries=[TAB1, TAB2], refresh={"TAB1": False, "TAB2": False})
         second = await harvest(session, unchanged)
         assert (second.summary.updated, second.summary.skipped, second.summary.failed) == (
             0,
@@ -60,78 +61,102 @@ async def test_first_run_harvests_every_language_and_a_second_run_skips() -> Non
             0,
         )
         assert unchanged.fetched == []
-        # A skipped language is still recorded as checked, so "unchanged" and "not looked
-        # at since the last harvest" stay distinguishable.
+        # A skipped Table is still recorded as checked, so "current" and "not looked at
+        # since the last harvest" stay distinguishable.
         state = metadata.load_language_state(stored.table_id)
         assert state["sv"].last_checked_at > state["sv"].last_harvested_at
 
 
-async def test_one_language_fails_while_the_other_is_published() -> None:
+async def test_each_language_is_its_own_run_over_its_own_catalogue() -> None:
     with owner() as session:
         register(session)
-        adapter = StubAdapter(entries=[TAB1], behaviour={("TAB1", "sv"): UPSTREAM_DOWN})
-        run = await harvest(session, adapter)
-        assert (run.summary.updated, run.summary.skipped, run.summary.failed) == (0, 0, 1)
+        # TAB2 is published in Swedish only, so it is simply not in the English listing.
+        adapter = StubAdapter(entries=[], catalogues={"sv": [TAB1, TAB2], "en": [TAB1]})
+        swedish = await harvest(session, adapter, language="sv")
+        english = await harvest(session, adapter, language="en")
+
+        assert swedish.summary.updated == 2
+        assert english.summary.updated == 1
+        assert sorted(adapter.fetched) == [("TAB1", "en"), ("TAB1", "sv"), ("TAB2", "sv")]
+        # English was never requested for a Table that has no English version, so there
+        # is no failure to explain and nothing marked unavailable.
         metadata = MetadataRepository(session)
-        table = metadata.get_table_by_native(PROVIDER_ID, "TAB1")
-        assert table is not None
-        assert metadata.get_language(table.table_id, "en") is not None
-        assert metadata.get_language(table.table_id, "sv") is None
-        state = metadata.load_language_state(table.table_id)
-        assert state["sv"].failed is True
-        assert state["en"].failed is False
-        item = HarvestRepository(session).list_items(run.job.id)[0]
-        assert item.status is ItemStatus.FAILED
-        assert item.error is not None
-        assert item.error.details["languages"][0]["language"] == "sv"
+        table_two = metadata.get_table_by_native(PROVIDER_ID, "TAB2")
+        assert table_two is not None
+        assert table_two.availability_status.value == "available"
+        assert list(metadata.load_language_state(table_two.table_id)) == ["sv"]
+        table_one = metadata.get_table_by_native(PROVIDER_ID, "TAB1")
+        assert table_one is not None
+        assert sorted(metadata.load_language_state(table_one.table_id)) == ["en", "sv"]
 
 
-async def test_a_failed_language_is_retried_even_when_the_adapter_says_nothing_changed() -> None:
+async def test_a_job_in_a_language_the_provider_does_not_publish_fails_once() -> None:
     with owner() as session:
         register(session)
-        await harvest(
+        adapter = StubAdapter(entries=[TAB1, TAB2], languages=["sv"])
+        with pytest.raises(JobFailed) as failure:
+            await harvest(session, adapter, language="de")
+        assert failure.value.diagnostic.code == "language_not_published"
+        assert failure.value.diagnostic.details["supported"] == ["sv"]
+        # It failed before any Table was touched, rather than once per Table.
+        assert adapter.discovered == [] and adapter.fetched == []
+        assert HarvestRepository(session).list_items(1) == []
+
+
+async def test_a_failed_table_keeps_the_run_going_and_is_retried_next_time() -> None:
+    with owner() as session:
+        register(session)
+        adapter = StubAdapter(entries=[TAB1, TAB2], behaviour={("TAB1", "sv"): UPSTREAM_DOWN})
+        run = await harvest(session, adapter)
+        assert (run.summary.updated, run.summary.skipped, run.summary.failed) == (1, 0, 1)
+        metadata = MetadataRepository(session)
+        # A brand new Table whose only fetch failed publishes no identity at all.
+        assert metadata.get_table_by_native(PROVIDER_ID, "TAB1") is None
+        assert metadata.get_table_by_native(PROVIDER_ID, "TAB2") is not None
+        items = {item.native_table_id: item for item in HarvestRepository(session).list_items(1)}
+        assert items["TAB1"].status is ItemStatus.FAILED
+        assert items["TAB1"].error is not None
+        assert items["TAB1"].error.stage is DiagnosticStage.FETCH_METADATA
+        assert items["TAB1"].error.details["language"] == "sv"
+        assert items["TAB2"].status is ItemStatus.UPDATED
+
+        # The adapter now considers everything unchanged. TAB1 still has no accepted
+        # metadata, so the engine's own check overrides that and fetches it anyway.
+        recovering = StubAdapter(entries=[TAB1, TAB2], refresh={"TAB1": False, "TAB2": False})
+        second = await harvest(session, recovering)
+        assert recovering.fetched == [("TAB1", "sv")]
+        assert (second.summary.updated, second.summary.skipped) == (1, 1)
+
+
+async def test_a_failure_on_an_existing_table_is_recorded_against_its_language() -> None:
+    with owner() as session:
+        register(session)
+        await harvest(session, StubAdapter(entries=[TAB1]))
+        run = await harvest(
             session, StubAdapter(entries=[TAB1], behaviour={("TAB1", "sv"): UPSTREAM_DOWN})
         )
-        # The adapter's markers now match for both languages. Swedish is still owed a
-        # retry, because it has no successful harvest to compare against.
-        recovering = StubAdapter(entries=[TAB1], refresh={"TAB1": []})
-        run = await harvest(session, recovering)
-        assert recovering.fetched == [("TAB1", "sv")]
-        assert (run.summary.updated, run.summary.skipped, run.summary.failed) == (1, 0, 0)
+        assert run.summary.failed == 1
         metadata = MetadataRepository(session)
         table = metadata.get_table_by_native(PROVIDER_ID, "TAB1")
         assert table is not None
-        assert metadata.load_language_state(table.table_id)["sv"].failed is False
-        assert table.availability_status.value == "available"
-
-
-async def test_a_brand_new_table_whose_first_fetch_fails_publishes_nothing() -> None:
-    with owner() as session:
-        register(session)
-        adapter = StubAdapter(
-            entries=[TAB1], languages=["sv"], behaviour={("TAB1", "sv"): UPSTREAM_DOWN}
-        )
-        run = await harvest(session, adapter)
-        assert run.summary.failed == 1
-        metadata = MetadataRepository(session)
-        # No identity is minted for something that has never been read successfully.
-        assert metadata.get_table_by_native(PROVIDER_ID, "TAB1") is None
-        item = HarvestRepository(session).list_items(run.job.id)[0]
-        assert item.table_id is None
-        assert item.error is not None and item.error.stage is DiagnosticStage.FETCH_METADATA
+        # The previously accepted metadata survives the failed attempt.
+        assert metadata.get_language(table.table_id, "sv") is not None
+        state = metadata.load_language_state(table.table_id)
+        assert state["sv"].failed is True
+        assert table.availability_status.value == "unavailable"
 
 
 async def test_force_refetches_a_table_the_adapter_considers_unchanged() -> None:
     with owner() as session:
         register(session)
         await harvest(session, StubAdapter(entries=[TAB1]))
-        forced = StubAdapter(entries=[TAB1], refresh={"TAB1": []})
-        run = await harvest(session, forced, request=HarvestRequest(force=True))
-        assert sorted(forced.fetched) == [("TAB1", "en"), ("TAB1", "sv")]
+        forced = StubAdapter(entries=[TAB1], refresh={"TAB1": False})
+        run = await harvest(session, forced, request=HarvestRequest(language="sv", force=True))
+        assert forced.fetched == [("TAB1", "sv")]
         assert run.summary.updated == 1
 
 
-async def test_absence_retires_and_reappearance_restores_without_new_metadata() -> None:
+async def test_a_table_missing_from_a_later_run_keeps_everything_it_had() -> None:
     with owner() as session:
         register(session)
         await harvest(session, StubAdapter(entries=[TAB1, TAB2]))
@@ -139,31 +164,19 @@ async def test_absence_retires_and_reappearance_restores_without_new_metadata() 
         table_two = metadata.get_table_by_native(PROVIDER_ID, "TAB2")
         assert table_two is not None
 
-        gone = await harvest(session, StubAdapter(entries=[TAB1]))
-        assert gone.summary.retired == [table_two.table_id]
-        refreshed = metadata.get_table(table_two.table_id)
-        assert refreshed is not None and refreshed.retired is True
-
-        # TAB2 comes back unchanged, so this run accepts no metadata for it at all.
-        back = StubAdapter(entries=[TAB1, TAB2], refresh={"TAB1": [], "TAB2": []})
-        run = await harvest(session, back)
-        assert back.fetched == []
-        assert run.summary.restored == [table_two.table_id]
-        restored = metadata.get_table(table_two.table_id)
-        assert restored is not None and restored.retired is False
+        # TAB2 is gone from the listing. Nothing acts on that: its identity, metadata and
+        # language state are all left exactly as they were, and it stays searchable.
+        run = await harvest(session, StubAdapter(entries=[TAB1]))
+        assert run.summary.items == 1
+        assert metadata.get_table(table_two.table_id) is not None
+        assert metadata.get_language(table_two.table_id, "sv") is not None
+        assert {row.table_id for row in metadata.search("Befolkning")} == {
+            table_two.table_id,
+            "scb-tab1",
+        }
 
 
-async def test_a_partial_inventory_never_decides_absence() -> None:
-    with owner() as session:
-        register(session)
-        await harvest(session, StubAdapter(entries=[TAB1, TAB2]))
-        run = await harvest(session, StubAdapter(entries=[TAB1], authoritative=False))
-        assert run.summary.retired == [] and run.summary.restored == []
-        table_two = MetadataRepository(session).get_table_by_native(PROVIDER_ID, "TAB2")
-        assert table_two is not None and table_two.retired is False
-
-
-async def test_a_single_table_job_addresses_the_upstream_identity_and_retires_nothing() -> None:
+async def test_a_single_table_job_addresses_the_upstream_identity() -> None:
     with owner() as session:
         register(session)
         await harvest(session, StubAdapter(entries=[TAB1, TAB2]))
@@ -175,61 +188,32 @@ async def test_a_single_table_job_addresses_the_upstream_identity_and_retires_no
         run = await harvest(
             session,
             narrowed,
-            request=HarvestRequest(table_id=table_one.table_id, force=True),
+            request=HarvestRequest(language="sv", table_id=table_one.table_id, force=True),
         )
         scope = narrowed.discovered[0]
-        assert scope.table_id == table_one.table_id
-        assert scope.native_table_id == "TAB1"
-        # Discovery listed both Tables; only the requested one is processed, and the
-        # inventory says nothing about absence because the scope named a Table.
+        assert (scope.language, scope.table_id, scope.native_table_id) == (
+            "sv",
+            table_one.table_id,
+            "TAB1",
+        )
         assert run.summary.items == 1
-        assert run.summary.retired == []
-        assert {native for native, _ in narrowed.fetched} == {"TAB1"}
-
-
-async def test_a_language_a_table_does_not_exist_in_is_never_fetched() -> None:
-    with owner() as session:
-        register(session)
-        # TAB2 is published in Swedish only, which upstream reports as a missing table
-        # rather than an empty answer, so asking for English would fail it on every run.
-        swedish_only = DiscoveryEntry(native_table_id="TAB2", available_languages=["sv"])
-        adapter = StubAdapter(entries=[TAB1, swedish_only])
-        run = await harvest(session, adapter)
-        assert (run.summary.updated, run.summary.failed) == (2, 0)
-        assert sorted(adapter.fetched) == [
-            ("TAB1", "en"),
-            ("TAB1", "sv"),
-            ("TAB2", "sv"),
-        ]
-        metadata = MetadataRepository(session)
-        table = metadata.get_table_by_native(PROVIDER_ID, "TAB2")
-        assert table is not None
-        assert table.availability_status.value == "available"
-        assert list(metadata.load_language_state(table.table_id)) == ["sv"]
-
-        # The floor that forces a never-harvested language must not reintroduce it.
-        again = StubAdapter(entries=[TAB1, swedish_only], refresh={"TAB1": [], "TAB2": []})
-        second = await harvest(session, again)
-        assert again.fetched == []
-        assert second.summary.skipped == 2
+        assert narrowed.fetched == [("TAB1", "sv")]
 
 
 async def test_a_result_for_the_wrong_table_is_a_failure_not_a_silent_skip() -> None:
     with owner() as session:
         register(session)
         adapter = StubAdapter(
-            entries=[TAB1],
-            languages=["sv"],
-            behaviour={("TAB1", "sv"): fetch_result("TAB2", "sv")},
+            entries=[TAB1], behaviour={("TAB1", "sv"): fetch_result("TAB2", "sv")}
         )
         run = await harvest(session, adapter)
         assert run.summary.failed == 1
-        item = HarvestRepository(session).list_items(run.job.id)[0]
+        item = HarvestRepository(session).list_items(1)[0]
         assert item.error is not None and item.error.stage is DiagnosticStage.NORMALIZE
         assert MetadataRepository(session).get_table_by_native(PROVIDER_ID, "TAB2") is None
 
 
-async def test_incomplete_discovery_fails_the_job_rather_than_retiring_everything() -> None:
+async def test_a_failed_discovery_fails_the_job_and_changes_nothing() -> None:
     with owner() as session:
         register(session)
         await harvest(session, StubAdapter(entries=[TAB1, TAB2]))
@@ -237,8 +221,9 @@ async def test_incomplete_discovery_fails_the_job_rather_than_retiring_everythin
         with pytest.raises(JobFailed) as failure:
             await harvest(session, broken)
         assert failure.value.diagnostic.stage is DiagnosticStage.DISCOVERY
-        table_two = MetadataRepository(session).get_table_by_native(PROVIDER_ID, "TAB2")
-        assert table_two is not None and table_two.retired is False
+        metadata = MetadataRepository(session)
+        assert metadata.get_table_by_native(PROVIDER_ID, "TAB2") is not None
+        assert len(metadata.search("Befolkning")) == 2
 
 
 async def test_cancellation_stops_the_traversal_and_closes_the_running_item() -> None:
@@ -259,14 +244,11 @@ async def test_cancellation_stops_the_traversal_and_closes_the_running_item() ->
             raise AssertionError("the cancelled request should never complete")
 
         adapter = StubAdapter(
-            entries=[TAB1, TAB2],
-            languages=["sv"],
-            behaviour={("TAB2", "sv"): stop_and_never_answer},
+            entries=[TAB1, TAB2], behaviour={("TAB2", "sv"): stop_and_never_answer}
         )
         with pytest.raises(HarvestStopped):
             await harvest(session, adapter, control_factory=build)
-        queue = HarvestRepository(session)
-        items = queue.list_items(1)
+        items = HarvestRepository(session).list_items(1)
         assert [item.native_table_id for item in items] == ["TAB1", "TAB2"]
         assert items[0].status is ItemStatus.UPDATED
         assert items[1].status is ItemStatus.FAILED

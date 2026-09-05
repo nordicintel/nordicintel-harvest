@@ -125,7 +125,12 @@ class Worker:
             job = queue.claim()
             if job is None:
                 return False
-            logger.info("claimed job %s for provider %s", job.id, job.provider_id)
+            logger.info(
+                "claimed job %s for provider %s in %s",
+                job.id,
+                job.provider_id,
+                job.request.language,
+            )
             try:
                 await self._run_job(session, queue, job, stop)
             finally:
@@ -268,8 +273,8 @@ def _request_interval(settings: Settings, provider: ProviderDefinition) -> float
 
 def _describe(summary: HarvestSummary) -> str:
     return (
-        f"{summary.updated} updated, {summary.skipped} skipped, {summary.failed} failed, "
-        f"{len(summary.restored)} restored, {len(summary.retired)} retired"
+        f"{summary.language}: {summary.updated} updated, {summary.skipped} skipped, "
+        f"{summary.failed} failed"
     )
 
 

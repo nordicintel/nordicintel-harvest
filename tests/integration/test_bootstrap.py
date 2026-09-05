@@ -48,14 +48,27 @@ def test_a_provider_and_schedule_can_be_configured_from_the_command_line(
     assert main(["provider", "upsert", str(definition)]) == 0
     assert output(capsys)["region"] == "SE"
 
-    assert main(["schedule", "set", PROVIDER_ID, "--every-seconds", "3600", "--start-now"]) == 0
+    assert (
+        main(["schedule", "set", PROVIDER_ID, "sv", "--every-seconds", "3600", "--start-now"])
+        == 0
+    )
     first = output(capsys)["next_run_at"]
     # Updating an interval without saying when it should next run must not silently move
     # the run that was already scheduled.
-    assert main(["schedule", "set", PROVIDER_ID, "--every-seconds", "7200"]) == 0
+    assert main(["schedule", "set", PROVIDER_ID, "sv", "--every-seconds", "7200"]) == 0
     updated = output(capsys)
     assert updated["next_run_at"] == first
     assert updated["every_seconds"] == 7200
+    assert updated["language"] == "sv"
+
+    # A second language is a second schedule, on its own interval.
+    assert (
+        main(["schedule", "set", PROVIDER_ID, "EN", "--every-seconds", "600", "--start-now"])
+        == 0
+    )
+    assert output(capsys)["language"] == "en"
+    assert main(["schedule", "list", "--provider-id", PROVIDER_ID]) == 0
+    assert {row["language"] for row in output(capsys)} == {"sv", "en"}
 
 
 def test_a_manual_request_is_admitted_replayed_and_cancellable(
@@ -64,13 +77,16 @@ def test_a_manual_request_is_admitted_replayed_and_cancellable(
     with owner() as session:
         register(session)
 
-    assert main(["harvest", "enqueue", PROVIDER_ID, "--languages", "sv,en", "--key", "k1"]) == 0
+    assert main(["harvest", "enqueue", PROVIDER_ID, "sv", "--key", "k1"]) == 0
     job = output(capsys)
-    assert job["request"]["languages"] == ["en", "sv"]
-    assert main(["harvest", "enqueue", PROVIDER_ID, "--languages", "EN,SV", "--key", "k1"]) == 0
+    assert job["request"]["language"] == "sv"
+    assert main(["harvest", "enqueue", PROVIDER_ID, "SV", "--key", "k1"]) == 0
     assert output(capsys)["id"] == job["id"]
     # The same key with a different request is a conflict, not a second job.
-    assert main(["harvest", "enqueue", PROVIDER_ID, "--force", "--key", "k1"]) == 1
+    assert main(["harvest", "enqueue", PROVIDER_ID, "en", "--key", "k1"]) == 1
+    # A different language is different work, and is admitted as its own job.
+    assert main(["harvest", "enqueue", PROVIDER_ID, "en", "--key", "k2"]) == 0
+    assert output(capsys)["request"]["language"] == "en"
 
     assert main(["jobs", "cancel", str(job["id"])]) == 0
     assert output(capsys)["status"] == JobStatus.CANCELLED.value
@@ -81,7 +97,7 @@ def test_disabling_a_provider_can_cascade_to_its_queue(
 ) -> None:
     with owner() as session:
         register(session)
-        queued = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest())
+        queued = HarvestRepository(session).enqueue(PROVIDER_ID, HarvestRequest(language="sv"))
 
     assert main(["provider", "disable", PROVIDER_ID, "--cascade"]) == 0
     result = output(capsys)

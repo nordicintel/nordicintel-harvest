@@ -32,6 +32,15 @@ pxweb = "nordicintel_adapter_pxweb:factory"
 
 `nordicintel-bootstrap adapters` lists what this process can actually run.
 
+## One language per run
+
+A harvest job names a Provider and a language. Upstream catalogues are published per
+language and are not the same size — SCB carries 5,253 tables in Swedish and 3,315 in
+English — so a run over several languages would have to work out, per Table, which
+languages that Table actually has. Scoping the run to a language makes discovery answer
+that as a matter of fact instead. Two languages are two jobs, two schedules, and two
+independent inventories.
+
 See [docs/operations.md](docs/operations.md) for configuration, a first run, and failure
 diagnosis.
 

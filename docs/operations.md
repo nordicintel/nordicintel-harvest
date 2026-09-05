@@ -101,29 +101,47 @@ export NORDICINTEL_DATABASE_URL=postgresql://user:pass@host/nordicintel
 python -m nordicintel_core.database migrate upgrade head
 nordicintel-bootstrap adapters                              # pxweb2 should be listed
 nordicintel-bootstrap provider upsert providers/scb.json
-nordicintel-bootstrap harvest enqueue scb
+nordicintel-bootstrap harvest enqueue scb sv
 nordicintel-worker
 ```
 
-`providers/scb.json` in this repository is a working Statistics Sweden definition. Its
-`config.table_ids` restricts the run to a handful of tables, which is what makes a first
-run finish in seconds rather than working through 5,253 of them. Remove that key for a
-real harvest; while it is present the inventory is not authoritative and nothing is ever
-retired.
+A run is one Provider in one language, so the language is an argument and not a flag.
+Harvesting SCB in both languages is two jobs, and they are genuinely different work: the
+Swedish catalogue has 5,253 tables and the English one 3,315, because a table never
+published in English is absent from the English catalogue rather than empty in it.
+
+`providers/scb.json` in this repository is a working Statistics Sweden definition. Nothing
+in it lists tables: what a provider publishes is discovered every run, and the only
+statement of what exists is the provider's own catalogue listing.
+
+A first full SCB run is around an hour per language at the configured request spacing.
+It is safe to interrupt — the worker finalizes the job as cancelled and keeps everything
+already accepted, and the next run continues from there.
 
 Then look at what happened:
 
 ```bash
-nordicintel-bootstrap jobs list --provider-id scb
+nordicintel-bootstrap jobs list --provider-id scb --language sv
 nordicintel-bootstrap jobs items 1 --status failed
 nordicintel-bootstrap tables search "befolkning" --language sv
 nordicintel-bootstrap tables show scb-tab1 --language sv
 ```
 
-To schedule it instead, `nordicintel-bootstrap schedule set scb --every-seconds 86400
---start-now` and run `nordicintel-scheduler`. An interval schedule has no natural first
-run, so the first timestamp is explicit: `--start-now`, `--at <ISO timestamp>`, or, when
-updating an existing schedule, neither, which keeps the timestamp it already had.
+To schedule it instead, give each language its own schedule and run
+`nordicintel-scheduler`:
+
+```bash
+nordicintel-bootstrap schedule set scb sv --every-seconds 86400 --start-now
+nordicintel-bootstrap schedule set scb en --every-seconds 86400 --start-now
+```
+
+They run on their own intervals and neither can starve the other: the scheduler treats a
+Provider as busy per language, so one being queued never suppresses the other. Execution
+is still serialized by the provider lock, so the two simply queue behind each other.
+
+An interval schedule has no natural first run, so the first timestamp is explicit:
+`--start-now`, `--at <ISO timestamp>`, or, when updating an existing schedule, neither,
+which keeps the timestamp it already had.
 
 ## Reading an outcome
 
@@ -135,13 +153,14 @@ updating an existing schedule, neither, which keeps the timestamp it already had
 
 | Item status | What it means |
 |---|---|
-| `updated` | At least one language was accepted, and none failed. |
-| `skipped` | Every requested language was already current. |
-| `failed` | At least one language failed. Successful languages in the same run are kept. |
+| `updated` | The Table's metadata was fetched and accepted in this job's language. |
+| `skipped` | It was already current, so nothing was fetched. |
+| `failed` | It could not be harvested. Other Tables in the same run are unaffected. |
 
-A failed item's diagnostic carries `details.languages`, one record per language that
-failed, with its own stage and code. A failed job carries one diagnostic and no items are
-left running.
+A failed item's diagnostic names its stage and carries the language in `details`. A failed
+job carries one diagnostic and no items are left running. A job asking for a language its
+Provider does not publish fails once, before any Table is touched, rather than once per
+Table.
 
 `worker_abandoned` on a job means recovery closed it: the worker's session ended without
 finalizing. Recovery inserts no retry. The next scheduled run picks the work up, or you
@@ -178,14 +197,12 @@ reports a request, not a completed stop.
 3. `nordicintel-bootstrap tables show <table-id>` — which languages are currently failing,
    and when each last succeeded. A language with `failed: true` is refetched on the next
    run whatever the adapter's markers say.
-4. Nothing retired unexpectedly? Absence is only decided by a complete provider-wide
-   inventory. A failed or partial discovery retires nothing, and a Table that reappears in
-   a later inventory is restored even if its metadata was unchanged.
-5. A Table skipped in a language it should have? A Table is only fetched in the languages
-   its adapter reports it as having. Upstream catalogues are not the same size in every
-   language, and a language a Table was never published in is an error rather than an
-   empty answer, so that bound is absolute: the retry a never-harvested language is
-   normally owed does not override it.
+4. A Table missing in one language but not another? That is normal, and nothing is wrong.
+   Catalogues are published per language and are not the same size; each language is
+   harvested by its own job over its own listing. `nordicintel-bootstrap tables show
+   <table-id>` lists the languages a Table actually has.
+5. A Table that vanished upstream? Nothing acts on that. It keeps its identity, its stored
+   metadata and its place in search until someone decides otherwise.
 
 Diagnostics never contain URLs, request bodies or credentials: only exception types this
 project and core define contribute their own text, and everything else is reported by

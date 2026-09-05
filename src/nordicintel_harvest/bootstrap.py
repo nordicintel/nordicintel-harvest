@@ -39,17 +39,11 @@ from .registry import AdapterRegistry
 from .settings import load_settings
 
 
-def _languages(value: str | None) -> list[str] | None:
-    if value is None:
-        return None
-    return [part.strip() for part in value.split(",") if part.strip()]
-
-
 def _request(arguments: argparse.Namespace) -> HarvestRequest:
     return HarvestRequest(
+        language=arguments.language,
         table_id=getattr(arguments, "table_id", None),
         force=getattr(arguments, "force", False),
-        languages=_languages(getattr(arguments, "languages", None)),
     )
 
 
@@ -77,7 +71,7 @@ def _schedule_set(session: Any, arguments: argparse.Namespace) -> None:
     elif arguments.start_now:
         next_run_at = datetime.now(UTC)
     else:
-        existing = ScheduleRepository(session).get(arguments.provider_id)
+        existing = ScheduleRepository(session).get(arguments.provider_id, arguments.language)
         next_run_at = (
             existing.next_run_at
             if existing is not None
@@ -118,24 +112,27 @@ def _build_parser() -> argparse.ArgumentParser:
     schedule = commands.add_parser("schedule", help="Interval scheduling").add_subparsers(
         dest="action", required=True
     )
-    setter = schedule.add_parser("set", help="Create or replace a provider's schedule")
+    setter = schedule.add_parser(
+        "set", help="Create or replace one provider-and-language schedule"
+    )
     setter.add_argument("provider_id")
+    setter.add_argument("language", help="The language this schedule harvests")
     setter.add_argument("--every-seconds", type=int, required=True)
-    setter.add_argument("--languages", help="Comma-separated codes, or omit for adapter defaults")
     setter.add_argument("--force", action="store_true")
     setter.add_argument("--disabled", action="store_true")
     timing = setter.add_mutually_exclusive_group()
     timing.add_argument("--start-now", action="store_true", help="Make the schedule due now")
     timing.add_argument("--at", help="First run as an ISO timestamp with an offset")
-    schedule.add_parser("list", help="List schedules by next run")
+    schedule_list = schedule.add_parser("list", help="List schedules by next run")
+    schedule_list.add_argument("--provider-id")
 
     harvest = commands.add_parser("harvest", help="Manual harvest requests").add_subparsers(
         dest="action", required=True
     )
     enqueue = harvest.add_parser("enqueue", help="Queue a manual harvest")
     enqueue.add_argument("provider_id")
+    enqueue.add_argument("language", help="The language to harvest")
     enqueue.add_argument("--table-id", help="Canonical table identifier for a single-table run")
-    enqueue.add_argument("--languages")
     enqueue.add_argument("--force", action="store_true")
     enqueue.add_argument("--key", help="Idempotency key reused across retries of one request")
 
@@ -144,6 +141,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     listing = jobs.add_parser("list", help="List jobs, newest first")
     listing.add_argument("--provider-id")
+    listing.add_argument("--language")
     listing.add_argument("--status", choices=[status.value for status in JobStatus])
     listing.add_argument("--limit", type=int, default=20)
     show = jobs.add_parser("show", help="Show one job")
@@ -204,7 +202,13 @@ def _dispatch(session: Any, arguments: argparse.Namespace) -> None:  # a flat me
         if action == "set":
             _schedule_set(session, arguments)
         else:
-            _emit(_dump(ScheduleRepository(session).list_schedules(limit=200)))
+            _emit(
+                _dump(
+                    ScheduleRepository(session).list_schedules(
+                        provider_id=arguments.provider_id, limit=200
+                    )
+                )
+            )
     elif command == "harvest":
         job = HarvestRepository(session).enqueue(
             arguments.provider_id, _request(arguments), request_key=arguments.key
@@ -217,7 +221,10 @@ def _dispatch(session: Any, arguments: argparse.Namespace) -> None:  # a flat me
             _emit(
                 _dump(
                     queue.list_jobs(
-                        provider_id=arguments.provider_id, status=status, limit=arguments.limit
+                        provider_id=arguments.provider_id,
+                        language=arguments.language,
+                        status=status,
+                        limit=arguments.limit,
                     )
                 )
             )
