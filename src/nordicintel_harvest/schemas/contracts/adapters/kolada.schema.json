@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nordicintel/nordicintel-schemas/v1.0.0/schemas/adapters/kolada.schema.json",
+  "title": "kolada harvest configuration",
+  "description": "Fixed Swedish Kolada API; municipality and OU datasets are harvested together. No adapter-specific settings required.",
+  "type": "object",
+  "properties": {
+    "extension": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "retrieval": {
+      "type": "object",
+      "properties": {
+        "extension": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

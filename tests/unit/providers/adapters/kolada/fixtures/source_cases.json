@@ -1,0 +1,146 @@
+[
+  {
+    "kpi": {
+      "auspice": "X",
+      "description": "Totala emissioner av flyktiga organiska ämnen förutom metan (NMVOC) från industri inom det geografiska området. Enskilda industriverksamheter kan leda till höga utsläpp lokalt. Utsläppen ska inte tolkas som konsumtionsbaserade utsläpp. Nyckeltalet följer upp miljökvalitetsmålet Frisk luft. Källa: RKA har beräknat utsläpp med data från den Nationella emissionsdatabasen. Uppgifter för olika undersektorer kan vara osäkra på kommunnivå, se vidare Metodbeskrivning på den Nationella emissionsdatabasens hemsida.",
+      "has_ou_data": 0,
+      "id": "N00514",
+      "is_divided_by_gender": 0,
+      "municipality_type": "A",
+      "operating_area": "Infrastruktur, miljö- och hälsoskydd mm",
+      "perspective": "Volymer",
+      "prel_publication_date": null,
+      "publ_period": 2025,
+      "publication_date": "2027-06-09",
+      "title": "Utsläpp till luft av flyktiga organiska ämnen, industri, ton NMVOC"
+    },
+    "source": "RKA har beräknat utsläpp med data från den Nationella emissionsdatabasen",
+    "origin": "description"
+  },
+  {
+    "kpi": {
+      "auspice": "T",
+      "description": "Andel tjänstgörande lärare i sfi med lärarlegitimation och behörighet i minst ett ämne, avser lärare i huvudmannens skolenheter. Mättillfälle: 15 oktober. Källa. Skolverket.",
+      "has_ou_data": 0,
+      "id": "N18704",
+      "is_divided_by_gender": 0,
+      "municipality_type": "K",
+      "operating_area": "Vuxenutbildning",
+      "perspective": "Resurser",
+      "prel_publication_date": null,
+      "publ_period": 2026,
+      "publication_date": "2027-04-08",
+      "title": "Lärare (heltidstjänster) i sfi med lärarlegitimation, i huvudmannens skolenheter, andel (%)"
+    },
+    "source": "Skolverket",
+    "origin": "description"
+  },
+  {
+    "kpi": {
+      "auspice": "T",
+      "description": "Antal elever per lärare i SFI, omräknat till heltidstjänster, avser egen regi, externa utbildningsanordnare är exkluderade. Källa: Skolverket.                       Målpopulationen för statistiken om pedagogisk personal, som är den 15 oktober, skiljer sig från målpopulationen för statistiken om elever i komvux, som är hela kalenderåret. Detta beror på att komvux som skolform inte är uppdelad i läsår på samma sätt som övriga skolformer, vilket resulterar i att den 15 oktober inte är ett representativt datum för att ge en bild av komvux ett givet kalenderår. Att målpopulationerna skiljer sig åt leder till att måttet lärartäthet (antal elever per heltidstjänst) är behäftat med stor osäkerhet. Skolverket har därför valt att inte publicera detta statistikmått från och med läsåret 2024/25.",
+      "has_ou_data": 0,
+      "id": "N18705",
+      "is_divided_by_gender": 0,
+      "municipality_type": "K",
+      "operating_area": "Vuxenutbildning",
+      "perspective": "Volymer",
+      "prel_publication_date": null,
+      "publ_period": null,
+      "publication_date": null,
+      "title": "Elever per lärare (heltidstjänster) i sfi, kommunal regi, antal (-2023)"
+    },
+    "source": "Skolverket",
+    "origin": "description"
+  },
+  {
+    "kpi": {
+      "auspice": "X",
+      "description": "Andel förnybar elproduktion. Elproduktion av vatten-, vindkraft, samt förnybara bränslen, dividerat med total elproduktion. Från och med 2021 ingår även solkraft. Oavsett producent, produktion i megawattimmar (MWh), inom det geografiska områdets gränser. För att skatta produktion av förnybara bränslen, har andel förnybar bränsleanvändning vid elproduktion använts. Källa: Energimyndigheten och SCB.",
+      "has_ou_data": 0,
+      "id": "N45925",
+      "is_divided_by_gender": 0,
+      "municipality_type": "A",
+      "operating_area": "Affärsverksamhet",
+      "perspective": "Volymer",
+      "prel_publication_date": null,
+      "publ_period": 2025,
+      "publication_date": "2027-03-06",
+      "title": "Elproduktion av förnybara energikällor inom det geografiska området, andel (%)"
+    },
+    "source": "Energimyndigheten och SCB",
+    "origin": "description"
+  },
+  {
+    "kpi": {
+      "auspice": "X",
+      "description": "Deltagande i kultur är ett medelvärde av a) deltagande i konstutställning och/eller museum, b) teater eller bio samt c) sportevenemang. Källa: Folkhälsomyndigheten. Deltagande i vardera kategori är genomsnittligt deltagande bland befolkning 16-84 år, perioden år T, T-1 och T-2.",
+      "has_ou_data": 0,
+      "id": "N60988",
+      "is_divided_by_gender": 1,
+      "municipality_type": "A",
+      "operating_area": "Kultur och fritid",
+      "perspective": "Övrigt",
+      "prel_publication_date": null,
+      "publ_period": null,
+      "publication_date": null,
+      "title": "Deltagande i kultur, andel (%) (-2024)"
+    },
+    "source": "Folkhälsomyndigheten",
+    "origin": "description"
+  },
+  {
+    "kpi": {
+      "auspice": "E",
+      "description": "Antal inköpta nya gånghjälpmedel som hanteras med båda armar/rollatorer ISO120606 till regionens hjälpmedelscentral(er) dividerat på antal invånare och multiplicerat med 10000. Avser huvudhjälpmedel, ej tillbehör eller reservdelar. Källa: Egen undersökning i regionen inklusive kommuner och SCB (-2021), Socialstyrelsen och SCB (2022-). Jämförelser mellan 2022 och tidigare år bör göras varsamt.",
+      "has_ou_data": 0,
+      "id": "N79710",
+      "is_divided_by_gender": 0,
+      "municipality_type": "A",
+      "operating_area": "Regionen, övergripande",
+      "perspective": "Volymer",
+      "prel_publication_date": null,
+      "publ_period": 2026,
+      "publication_date": "2027-06-17",
+      "title": "Gånghjälpmedel som hanteras med båda armar/ rollatorer inköpta till regionens hjälpmedelscentral(er), antal/10 000 invånare"
+    },
+    "source": "Egen undersökning i regionen inklusive kommuner och SCB (-2021), Socialstyrelsen och SCB (2022-)",
+    "origin": "description"
+  },
+  {
+    "kpi": {
+      "auspice": "X",
+      "description": "Avser total användning av egenproducerad kyla per lokalarea. Nyttiggjord (levererad) kyla till process och komfort från geoenergianläggningar, värmepumpar och kylmaskiner samt frikyla från mark/luft/sjö/snö. Avdrag ska inte göras för insatt el. Vid saknade mätvärden kan energimängden bedömas, t.ex. via gissat antal fullasttimmar eller kylfaktor (COP-kyla). Små anläggningar, mindre än 50 kW kyla, kan undantas (exempelvis mindre split-kyla anläggningar för teknikrum).  Redovisas utslaget på hela arean i respektive kategori och bestånd. Avser kyla som inte ingår i nyckeltalet för köpt fjärrkyla (F05). Källa: Regionens fastighetsnyckeltalsnäverk",
+      "has_ou_data": 1,
+      "id": "U60015",
+      "is_divided_by_gender": 0,
+      "municipality_type": "L",
+      "operating_area": "Infrastruktur, miljö- och hälsoskydd mm",
+      "perspective": "Volymer",
+      "prel_publication_date": null,
+      "publ_period": 2026,
+      "publication_date": "2027-04-26",
+      "title": "Kyla lokaler, egenproducerad, kWh/kvm BRA Källa: Egna uppgifter i regionen."
+    },
+    "source": "Regionens fastighetsnyckeltalsnäverk",
+    "origin": "description"
+  },
+  {
+    "kpi": {
+      "auspice": "X",
+      "description": "För beräkning av kvadratmeterpriset för småhus för permanentboende har respektive enskilt köp använts. \\nMed småhus för permanentboende avses småhus (typkod 220) som haft någon folkbokförd befolkning under 4 kvartal före försäljningstidpunkten.\\nDefinitionen av vad som räknas som permanentboende resp. fritidshus ändrades något år 2015 vilket kan påverka jämförelser över tid.\\nKälla: SCB:s Fastighetsprisregister\\n",
+      "has_ou_data": 0,
+      "id": "N07909",
+      "is_divided_by_gender": 0,
+      "municipality_type": "K",
+      "operating_area": "Infrastruktur, miljö- och hälsoskydd mm",
+      "perspective": "Övrigt",
+      "prel_publication_date": null,
+      "publ_period": 2026,
+      "publication_date": "2027-06-05",
+      "title": "Fastighetspris småhus, kr/kvm"
+    },
+    "source": "SCB:s Fastighetsprisregister",
+    "origin": "description"
+  }
+]

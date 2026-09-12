@@ -1,0 +1,1 @@
+"""Kolada adapter tests."""

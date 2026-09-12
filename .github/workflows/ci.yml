@@ -1,0 +1,18 @@
+name: CI
+on:
+  push:
+    branches: [main, harvest-system]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest
+      - run: uv build
+      - run: uv run --no-project --with dist/*.whl python -c "from nordicintel_harvest.schemas.contracts import _validators; assert len(_validators()) == 8"

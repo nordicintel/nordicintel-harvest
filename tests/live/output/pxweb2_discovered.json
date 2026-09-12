@@ -1,0 +1,234 @@
+[
+  {
+    "provider_code": "scb",
+    "dataset_code": "TAB4707",
+    "language": "sv",
+    "source_revision": "updated:v1:2026-08-28T06:00:00Z",
+    "updated": "2026-08-28T06:00:00+00:00",
+    "label": "Antal pågående anställningar efter anställningstid, kön och sektor. Månad 2015M04-2026M06",
+    "description": null,
+    "source": "SCB",
+    "note": null,
+    "subject_code": "AM",
+    "subject_label": null,
+    "time_unit": "Monthly",
+    "first_period": "2015M04",
+    "last_period": "2026M06",
+    "discontinued": false,
+    "metadata_url": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4707/metadata",
+    "data_url": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4707/data?lang=sv",
+    "web_url": "https://pxweb2.pages.dev/sv/table/TAB4707",
+    "doc_url": null,
+    "paths": [
+      {
+        "path": [
+          {
+            "id": "AM",
+            "label": "Arbetsmarknad",
+            "sortCode": "Arbetsmarknad"
+          },
+          {
+            "id": "AM0211",
+            "label": "Anställningar",
+            "sortCode": "005"
+          },
+          {
+            "id": "AM0211A",
+            "label": "Anställningar",
+            "sortCode": "001"
+          }
+        ]
+      }
+    ],
+    "official_statistics": null,
+    "contact": null,
+    "extension": {
+      "links": [
+        {
+          "rel": "self",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4707?lang=sv"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "en",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4707?lang=en"
+        },
+        {
+          "rel": "metadata",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4707/metadata?lang=sv"
+        },
+        {
+          "rel": "data",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4707/data?lang=sv&outputFormat=json-stat2"
+        }
+      ],
+      "variable_names": [
+        "sektor",
+        "kön",
+        "tabellinnehåll",
+        "månad"
+      ]
+    },
+    "id": null,
+    "role": null,
+    "dimension": null
+  },
+  {
+    "provider_code": "scb",
+    "dataset_code": "TAB4714",
+    "language": "sv",
+    "source_revision": "updated:v1:2026-08-28T06:00:00Z",
+    "updated": "2026-08-28T06:00:00+00:00",
+    "label": "Antal pågående anställningar efter anställningstid, sektor och näringsgren (SNI 2007). Månad 2015M04-2026M06",
+    "description": null,
+    "source": "SCB",
+    "note": null,
+    "subject_code": "AM",
+    "subject_label": null,
+    "time_unit": "Monthly",
+    "first_period": "2015M04",
+    "last_period": "2026M06",
+    "discontinued": false,
+    "metadata_url": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4714/metadata",
+    "data_url": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4714/data?lang=sv",
+    "web_url": "https://pxweb2.pages.dev/sv/table/TAB4714",
+    "doc_url": null,
+    "paths": [
+      {
+        "path": [
+          {
+            "id": "AM",
+            "label": "Arbetsmarknad",
+            "sortCode": "Arbetsmarknad"
+          },
+          {
+            "id": "AM0211",
+            "label": "Anställningar",
+            "sortCode": "005"
+          },
+          {
+            "id": "AM0211A",
+            "label": "Anställningar",
+            "sortCode": "001"
+          }
+        ]
+      }
+    ],
+    "official_statistics": null,
+    "contact": null,
+    "extension": {
+      "links": [
+        {
+          "rel": "self",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4714?lang=sv"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "en",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4714?lang=en"
+        },
+        {
+          "rel": "metadata",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4714/metadata?lang=sv"
+        },
+        {
+          "rel": "data",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4714/data?lang=sv&outputFormat=json-stat2"
+        }
+      ],
+      "variable_names": [
+        "sektor",
+        "näringsgren (SNI 2007)",
+        "tabellinnehåll",
+        "månad"
+      ]
+    },
+    "id": null,
+    "role": null,
+    "dimension": null
+  },
+  {
+    "provider_code": "scb",
+    "dataset_code": "TAB4718",
+    "language": "sv",
+    "source_revision": "updated:v1:2026-08-28T06:00:00Z",
+    "updated": "2026-08-28T06:00:00+00:00",
+    "label": "Antal pågående anställningar efter kön, region och sektor. Månad 2020M01-2026M06",
+    "description": null,
+    "source": "SCB",
+    "note": null,
+    "subject_code": "AM",
+    "subject_label": null,
+    "time_unit": "Monthly",
+    "first_period": "2020M01",
+    "last_period": "2026M06",
+    "discontinued": false,
+    "metadata_url": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4718/metadata",
+    "data_url": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4718/data?lang=sv",
+    "web_url": "https://pxweb2.pages.dev/sv/table/TAB4718",
+    "doc_url": null,
+    "paths": [
+      {
+        "path": [
+          {
+            "id": "AM",
+            "label": "Arbetsmarknad",
+            "sortCode": "Arbetsmarknad"
+          },
+          {
+            "id": "AM0211",
+            "label": "Anställningar",
+            "sortCode": "005"
+          },
+          {
+            "id": "AM0211A",
+            "label": "Anställningar",
+            "sortCode": "001"
+          }
+        ]
+      }
+    ],
+    "official_statistics": null,
+    "contact": null,
+    "extension": {
+      "links": [
+        {
+          "rel": "self",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4718?lang=sv"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "en",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4718?lang=en"
+        },
+        {
+          "rel": "metadata",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4718/metadata?lang=sv"
+        },
+        {
+          "rel": "data",
+          "hreflang": "sv",
+          "href": "https://statistikdatabasen.scb.se/api/v2/tables/TAB4718/data?lang=sv&outputFormat=json-stat2"
+        }
+      ],
+      "variable_names": [
+        "region",
+        "kön",
+        "sektor",
+        "tabellinnehåll",
+        "månad"
+      ]
+    },
+    "id": null,
+    "role": null,
+    "dimension": null
+  }
+]

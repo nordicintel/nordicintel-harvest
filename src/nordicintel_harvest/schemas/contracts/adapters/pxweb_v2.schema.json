@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nordicintel/nordicintel-schemas/v1.0.0/schemas/adapters/pxweb_v2.schema.json",
+  "title": "pxweb_v2 harvest configuration",
+  "description": "Adapter-specific harvest settings. Provider-specific behavior may be implemented directly in adapter code; extension allows additional inputs.",
+  "type": "object",
+  "properties": {
+    "base_api_url": {
+      "$ref": "../dataset.schema.json#/$defs/url"
+    },
+    "extension": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "base_api_url"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "retrieval": {
+      "type": "object",
+      "properties": {
+        "data_url": {
+          "$ref": "../dataset.schema.json#/$defs/url"
+        },
+        "extension": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "data_url"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

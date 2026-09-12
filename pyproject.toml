@@ -1,0 +1,24 @@
+[project]
+name = "nordicintel-harvest"
+version = "0.1.0"
+description = "API-controlled statistical metadata harvesting"
+requires-python = ">=3.12,<3.13"
+dependencies = ["pydantic>=2.11", "pydantic-settings>=2.8", "aiohttp>=3.11", "jsonschema>=4.26", "referencing>=0.37", "rfc3986-validator>=0.1.1", "rfc3339-validator>=0.1.4"]
+[project.scripts]
+nordicintel-harvest = "nordicintel_harvest.cli:main"
+[dependency-groups]
+dev = ["pytest>=8.3", "pytest-asyncio>=0.26", "ruff>=0.12"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[tool.hatch.build.targets.wheel]
+packages = ["src/nordicintel_harvest"]
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests/unit", "tests/integration"]
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

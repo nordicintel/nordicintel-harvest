@@ -1,0 +1,509 @@
+[
+  {
+    "code": "scb",
+    "label": {
+      "sv": "Statistiska centralbyrån"
+    },
+    "country_code": "SE",
+    "website": "https://www.scb.se/",
+    "harvest": {
+      "adapter": "pxweb_v2",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 0.4,
+      "config": {
+        "base_api_url": "https://statistikdatabasen.scb.se/api/v2",
+        "extension": {
+          "base_web_url": "https://pxweb2.pages.dev",
+          "cell_limit": 150000
+        }
+      }
+    }
+  },
+  {
+    "code": "ssb",
+    "label": {
+      "en": "Statistics Norway"
+    },
+    "country_code": "NO",
+    "website": "https://www.ssb.no/",
+    "harvest": {
+      "adapter": "pxweb_v2",
+      "languages": [
+        "en"
+      ],
+      "rate_limit": 0.25,
+      "config": {
+        "base_api_url": "https://data.ssb.no/api/pxwebapi/v2/",
+        "extension": {
+          "base_web_url": "https://www.ssb.no/en/statbank/table/",
+          "cell_limit": 800000
+        }
+      }
+    }
+  },
+  {
+    "code": "csn",
+    "label": {
+      "sv": "Centrala studiestödsnämnden (CSN)"
+    },
+    "country_code": "SE",
+    "website": "https://www.csn.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv"
+      ],
+      "rate_limit": 2,
+      "config": {
+        "base_api_url": "https://statistik.csn.se/PXWeb/api/v1",
+        "database_ids": [
+          "CSNstat"
+        ],
+        "extension": {
+          "base_web_url": "https://statistik.csn.se/PxWeb/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "energimyndigheten",
+    "label": {
+      "sv": "Energimyndigheten"
+    },
+    "country_code": "SE",
+    "website": "https://www.energimyndigheten.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 1.3,
+      "config": {
+        "base_api_url": "https://pxexternal.energimyndigheten.se/api/v1",
+        "database_ids": [
+          "Energimyndighetens_statistikdatabas"
+        ],
+        "extension": {
+          "base_web_url": "https://pxexternal.energimyndigheten.se/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "fohm",
+    "label": {
+      "sv": "Folkhälsomyndigheten"
+    },
+    "country_code": "SE",
+    "website": "https://www.folkhalsomyndigheten.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 0.35,
+      "config": {
+        "base_api_url": "https://fohm-app.folkhalsomyndigheten.se/Folkhalsodata/api/v1",
+        "database_ids": [
+          "A_Folkhalsodata"
+        ],
+        "extension": {
+          "base_web_url": "https://fohm-app.folkhalsomyndigheten.se/Folkhalsodata/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "sjv",
+    "label": {
+      "sv": "Statens jordbruksverk"
+    },
+    "country_code": "SE",
+    "website": "https://www.jordbruksverket.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv"
+      ],
+      "rate_limit": 0.5,
+      "config": {
+        "base_api_url": "https://statistik.sjv.se/PXWeb/api/v1",
+        "database_ids": [
+          "Jordbruksverkets%20statistikdatabas"
+        ],
+        "extension": {
+          "base_web_url": "https://statistik.sjv.se/PXWeb/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "konj",
+    "label": {
+      "sv": "Konjunkturinstitutets prognosdatabas"
+    },
+    "country_code": "SE",
+    "website": "https://www.konj.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 1.25,
+      "config": {
+        "base_api_url": "https://prognos.konj.se/PxWeb/api/v1",
+        "database_ids": [
+          "SenastePrognosen",
+          "UrvalAvVariabler",
+          "XLangtidsscenario"
+        ],
+        "extension": {
+          "base_web_url": "https://prognos.konj.se/PxWeb/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "lansstyrelsen",
+    "label": {
+      "sv": "Länsstyrelsernas statistikdatabas"
+    },
+    "country_code": "SE",
+    "website": "https://www.lansstyrelsen.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv"
+      ],
+      "rate_limit": 1.25,
+      "config": {
+        "base_api_url": "https://pxweb.lansstyrelsen.se/api/v1",
+        "database_ids": [
+          "Miljotillstandet_i_skogslandskapet"
+        ],
+        "extension": {
+          "base_web_url": "https://pxweb.lansstyrelsen.se/pxweb",
+          "cell_limit": 150000
+        }
+      }
+    }
+  },
+  {
+    "code": "msb",
+    "label": {
+      "sv": "MSB brand och olyckor"
+    },
+    "country_code": "SE",
+    "website": "https://www.msb.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 2,
+      "config": {
+        "base_api_url": "https://statistik.mcf.se/PXWeb/api/v1",
+        "database_ids": [
+          "PxData"
+        ],
+        "extension": {
+          "base_web_url": "https://statistik.mcf.se/PXWeb/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "nordicstat",
+    "label": {
+      "en": "Nordic Statistics"
+    },
+    "country_code": "XX",
+    "website": "https://www.nordicstatistics.org/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "en"
+      ],
+      "rate_limit": 2,
+      "config": {
+        "base_api_url": "https://pxweb.nordicstatistics.org/api/v1",
+        "database_ids": [
+          "Nordic%20Statistics"
+        ],
+        "extension": {
+          "base_web_url": "https://pxweb.nordicstatistics.org/pxweb",
+          "cell_limit": 1000000
+        }
+      }
+    }
+  },
+  {
+    "code": "riksskog",
+    "label": {
+      "sv": "SLU Riksskogstaxeringen"
+    },
+    "country_code": "SE",
+    "website": "https://www.slu.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 1.25,
+      "config": {
+        "base_api_url": "https://skogsstatistik.slu.se/api/v1",
+        "database_ids": [
+          "OffStat"
+        ],
+        "extension": {
+          "base_web_url": "https://skogsstatistik.slu.se/pxweb",
+          "cell_limit": 300000
+        }
+      }
+    }
+  },
+  {
+    "code": "unece",
+    "label": {
+      "en": "UNECE"
+    },
+    "country_code": "XX",
+    "website": "https://www.unece.org/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "en"
+      ],
+      "rate_limit": 2,
+      "config": {
+        "base_api_url": "https://w3.unece.org/PXWeb2015/api/v1",
+        "database_ids": [
+          "STAT"
+        ],
+        "extension": {
+          "base_web_url": "https://w3.unece.org/PXWeb2015/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "skogsstyrelsen",
+    "label": {
+      "sv": "Skogsstyrelsen"
+    },
+    "country_code": "SE",
+    "website": "https://www.skogsstyrelsen.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 2.8,
+      "config": {
+        "base_api_url": "https://pxweb.skogsstyrelsen.se/api/v1",
+        "database_ids": [
+          "Skogsstyrelsens%20statistikdatabas"
+        ],
+        "extension": {
+          "base_web_url": "https://pxweb.skogsstyrelsen.se/pxweb",
+          "cell_limit": 120000
+        }
+      }
+    }
+  },
+  {
+    "code": "statfin",
+    "label": {
+      "sv": "Statistikcentralen"
+    },
+    "country_code": "FI",
+    "website": "https://www.stat.fi/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "en",
+        "sv"
+      ],
+      "rate_limit": 0.35,
+      "config": {
+        "base_api_url": "https://statfin.stat.fi/PXWeb/api/v1",
+        "database_ids": [
+          "StatFin",
+          "StatFin_Passiivi"
+        ],
+        "extension": {
+          "base_web_url": "https://pxdata.stat.fi/PxWeb/pxweb",
+          "cell_limit": 120000
+        }
+      }
+    }
+  },
+  {
+    "code": "trafi2",
+    "label": {
+      "en": "Finnish Transport Safety Agency"
+    },
+    "country_code": "FI",
+    "website": "https://trafi.fi/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "en",
+        "sv"
+      ],
+      "rate_limit": 0.15,
+      "config": {
+        "base_api_url": "https://trafi2.stat.fi/PXWeb/api/v1",
+        "database_ids": [
+          "TraFi"
+        ],
+        "extension": {
+          "base_web_url": "https://trafi2.stat.fi/PXWeb/pxweb",
+          "cell_limit": 110000
+        }
+      }
+    }
+  },
+  {
+    "code": "vero",
+    "label": {
+      "en": "Finnish Tax Administration"
+    },
+    "country_code": "FI",
+    "website": "https://www.vero.fi/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "en",
+        "sv"
+      ],
+      "rate_limit": 0.15,
+      "config": {
+        "base_api_url": "https://vero2.stat.fi/PXWeb/api/v1",
+        "database_ids": [
+          "Vero"
+        ],
+        "extension": {
+          "base_web_url": "https://vero2.stat.fi/PXWeb/pxweb",
+          "cell_limit": 150000
+        }
+      }
+    }
+  },
+  {
+    "code": "asub",
+    "label": {
+      "en": "Statistics Åland"
+    },
+    "country_code": "FI",
+    "website": "https://pxweb.asub.ax/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "en",
+        "sv"
+      ],
+      "rate_limit": 1.1,
+      "config": {
+        "base_api_url": "https://pxweb.asub.ax/PXWeb/api/v1",
+        "database_ids": [
+          "Statistik",
+          "Utredning"
+        ],
+        "extension": {
+          "base_web_url": "https://pxweb.asub.ax/PXWeb/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "luke",
+    "label": {
+      "en": "LUKE Natural Resources Institute Finland"
+    },
+    "country_code": "FI",
+    "website": "https://www.luke.fi/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "en",
+        "sv"
+      ],
+      "rate_limit": 1.1,
+      "config": {
+        "base_api_url": "https://statdb.luke.fi/PXWeb/api/v1",
+        "database_ids": [
+          "LUKE"
+        ],
+        "extension": {
+          "base_web_url": "https://statdb.luke.fi/PXWeb/pxweb",
+          "cell_limit": 1000000
+        }
+      }
+    }
+  },
+  {
+    "code": "domstol",
+    "label": {
+      "sv": "Domstolsverket"
+    },
+    "country_code": "SE",
+    "website": "https://www.domstol.se/",
+    "harvest": {
+      "adapter": "pxweb_v1",
+      "languages": [
+        "sv",
+        "en"
+      ],
+      "rate_limit": 1.25,
+      "config": {
+        "base_api_url": "https://pxweb.etjanst.domstol.se/PxWeb/api/v1",
+        "database_ids": [
+          "DOMstat"
+        ],
+        "extension": {
+          "base_web_url": "https://pxweb.etjanst.domstol.se/PxWeb/pxweb",
+          "cell_limit": 100000
+        }
+      }
+    }
+  },
+  {
+    "code": "kolada",
+    "label": {
+      "sv": "Kolada"
+    },
+    "country_code": "SE",
+    "website": "https://kolada.se/",
+    "harvest": {
+      "adapter": "kolada",
+      "languages": [
+        "sv"
+      ],
+      "rate_limit": 0.35,
+      "config": {
+        "extension": {
+          "base_web_url": "https://kolada.se",
+          "cell_limit": 5000
+        }
+      }
+    }
+  }
+]

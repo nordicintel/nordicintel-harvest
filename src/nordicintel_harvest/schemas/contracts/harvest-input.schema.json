@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nordicintel/nordicintel-schemas/v1.0.0/schemas/harvest-input.schema.json",
+  "title": "Resolved input for one Harvest",
+  "description": "Built from provider.code, provider.harvest, and one selected language. The application checks configured language membership before invocation.",
+  "type": "object",
+  "properties": {
+    "adapter": {
+      "enum": [
+        "pxweb_v1",
+        "pxweb_v2",
+        "kolada"
+      ]
+    },
+    "provider_code": {
+      "$ref": "provider.schema.json#/properties/code"
+    },
+    "language": {
+      "enum": [
+        "sv",
+        "en"
+      ]
+    },
+    "rate_limit": {
+      "$ref": "harvest-config.schema.json#/$defs/rate_limit"
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "adapter",
+    "provider_code",
+    "language",
+    "rate_limit",
+    "config"
+  ],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "adapter": {
+          "const": "pxweb_v1"
+        },
+        "config": {
+          "$ref": "adapters/pxweb_v1.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "adapter": {
+          "const": "pxweb_v2"
+        },
+        "config": {
+          "$ref": "adapters/pxweb_v2.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "adapter": {
+          "const": "kolada"
+        },
+        "config": {
+          "$ref": "adapters/kolada.schema.json"
+        }
+      }
+    }
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "adapter": {
+            "const": "kolada"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "language": {
+            "const": "sv"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,431 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nordicintel/nordicintel-schemas/v1.0.0/schemas/dataset-metadata.schema.json",
+  "title": "Dataset metadata",
+  "description": "Detailed metadata for one dataset language version. Cross-field identity and ordering consistency requires application validation.",
+  "type": "object",
+  "required": [
+    "identity",
+    "id",
+    "dimension"
+  ],
+  "properties": {
+    "identity": {
+      "$ref": "dataset.schema.json#/$defs/identity"
+    },
+    "id": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "\\S"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "dimension": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "\\S"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/dimension"
+      },
+      "minProperties": 1
+    },
+    "role": {
+      "type": "object",
+      "properties": {
+        "time": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "geo": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "metric": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "label": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "extension": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "code"
+          ]
+        },
+        {
+          "required": [
+            "label"
+          ]
+        }
+      ]
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/pathNode"
+            },
+            "minItems": 1
+          },
+          "extension": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "official_statistics": {
+      "type": "boolean"
+    },
+    "source": {
+      "type": "string"
+    },
+    "note": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contact": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "mail": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "raw": {
+            "type": "string"
+          },
+          "extension": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "metadata_url": {
+      "$ref": "dataset.schema.json#/$defs/url"
+    },
+    "retrieval": {
+      "description": "Dataset-specific retrieval inputs. Identity and dimensions are supplied by the enclosing metadata, not duplicated in config.",
+      "type": "object",
+      "required": [
+        "type",
+        "config"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "pxweb_v1"
+            },
+            "config": {
+              "$ref": "adapters/pxweb_v1.schema.json#/$defs/retrieval"
+            }
+          }
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "pxweb_v2"
+            },
+            "config": {
+              "$ref": "adapters/pxweb_v2.schema.json#/$defs/retrieval"
+            }
+          }
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "kolada"
+            },
+            "config": {
+              "$ref": "adapters/kolada.schema.json#/$defs/retrieval"
+            }
+          }
+        }
+      ]
+    },
+    "extension": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "dimension": {
+      "type": "object",
+      "required": [
+        "label",
+        "category"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "category": {
+          "$ref": "#/$defs/category"
+        },
+        "note": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "link": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Upstream link relations, retained as an open relation map."
+        },
+        "extension": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "category": {
+      "type": "object",
+      "required": [
+        "index",
+        "label"
+      ],
+      "properties": {
+        "index": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minProperties": 1
+        },
+        "label": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "minProperties": 1
+        },
+        "child": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "uniqueItems": true
+          }
+        },
+        "coordinates": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              }
+            ],
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Longitude, latitude."
+          }
+        },
+        "unit": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/unit"
+          }
+        },
+        "note": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "extension": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "position": {
+          "enum": [
+            "start",
+            "end"
+          ]
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "extension": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "pathNode": {
+      "type": "object",
+      "required": [
+        "code",
+        "label"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "label": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "extension": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "retrieval"
+        ],
+        "properties": {
+          "retrieval": {
+            "properties": {
+              "type": {
+                "const": "kolada"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "identity": {
+            "properties": {
+              "language": {
+                "const": "sv"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

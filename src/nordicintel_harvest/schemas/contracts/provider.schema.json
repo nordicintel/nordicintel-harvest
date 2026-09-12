@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nordicintel/nordicintel-schemas/v1.0.0/schemas/provider.schema.json",
+  "title": "Provider",
+  "description": "A provider's stable identity and descriptive information, with optional stored harvest configuration.",
+  "type": "object",
+  "required": [
+    "code",
+    "label"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "description": "Stable provider identity, independent of display names and adapters. Other documents reference this value as provider_code.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$",
+      "not": {
+        "pattern": "\\s"
+      }
+    },
+    "label": {
+      "description": "Display names. Available translations do not declare adapter language support.",
+      "$ref": "#/$defs/translations"
+    },
+    "description": {
+      "description": "Descriptions of the provider in Swedish, English, or both.",
+      "$ref": "#/$defs/translations"
+    },
+    "country_code": {
+      "description": "Two uppercase letters identifying the provider's home country, not dataset coverage. Assigned-country membership is not checked.",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "pattern": "^[A-Z]{2}$"
+    },
+    "website": {
+      "description": "Absolute HTTP or HTTPS URI with a host. Consumers must enable URI format validation.",
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[hH][tT][tT][pP][sS]?://(?:[^/?#@]*@)?(?:\\[[^\\]]+\\]|[^/?#:@]+)(?::[0-9]*)?(?:[/?#]|$)"
+    },
+    "extension": {
+      "description": "Additional descriptive information. Harvest settings belong in harvest, not extension.",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "harvest": {
+      "$ref": "harvest-config.schema.json"
+    }
+  },
+  "$defs": {
+    "translations": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "sv": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "en": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      }
+    }
+  }
+}

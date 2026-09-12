@@ -1,0 +1,274 @@
+{
+  "dataset": {
+    "identity": {
+      "provider_code": "csn",
+      "dataset_code": "ABAKD11.px",
+      "language": "sv"
+    },
+    "label": "Återkravsskulder efter Åldersintervall, Skuldintervall, Skuldberäkningsdatum, Kön och Antal personer, Ingående skuld",
+    "updated": "2026-01-19T14:50:00Z",
+    "time_unit": "Other",
+    "discontinued": false,
+    "source_url": "https://statistik.csn.se/PxWeb/pxweb/sv/CSNstat/CSNstat__AB__AK/ABAKD11.px/"
+  },
+  "metadata": {
+    "identity": {
+      "provider_code": "csn",
+      "dataset_code": "ABAKD11.px",
+      "language": "sv"
+    },
+    "id": [
+      "Åldersintervall",
+      "Skuldintervall",
+      "Skuldberäkningsdatum",
+      "Kön",
+      "Antal personer, Ingående skuld"
+    ],
+    "dimension": {
+      "Åldersintervall": {
+        "label": "Åldersintervall",
+        "category": {
+          "index": {
+            "0": 0,
+            "1": 1,
+            "2": 2,
+            "3": 3,
+            "4": 4,
+            "5": 5,
+            "6": 6,
+            "7": 7,
+            "8": 8,
+            "9": 9,
+            "10": 10,
+            "11": 11,
+            "12": 12
+          },
+          "label": {
+            "0": "Totalt",
+            "1": "19 år eller yngre",
+            "2": "20-24 år",
+            "3": "25-29 år",
+            "4": "30-34 år",
+            "5": "35-39 år",
+            "6": "40-44 år",
+            "7": "45-49 år",
+            "8": "50-54 år",
+            "9": "55-59 år",
+            "10": "60-64 år",
+            "11": "65-68 år",
+            "12": "69 år eller äldre"
+          },
+          "note": {
+            "0": [
+              "Om 'Totalt' väljs redovisas nettototalen för alla, vilket innebär att varje person bara räknas en gång. Totaluppgifter i tabellerna svarar mot summan av samtliga värden som är möjliga att välja för en delpopulation eller en redovisningsgrupp. Totalen innebär alltså inte en summering av valda värden."
+            ]
+          }
+        },
+        "note": [
+          "Låntagarnas ålder den 31 december föregående år redovisas som fasta intervall."
+        ],
+        "extension": {
+          "elimination": true,
+          "eliminationValueCode": "0",
+          "show": "value",
+          "position": 0
+        }
+      },
+      "Skuldintervall": {
+        "label": "Skuldintervall",
+        "category": {
+          "index": {
+            "0": 0,
+            "1": 1,
+            "2": 2,
+            "3": 3,
+            "4": 4,
+            "5": 5,
+            "6": 6,
+            "7": 7,
+            "8": 8,
+            "9": 9,
+            "10": 10,
+            "11": 11
+          },
+          "label": {
+            "0": "Totalt",
+            "1": "1 - 4 999 kr",
+            "2": "5 000 - 9 999 kr",
+            "3": "10 000 - 14 999 kr",
+            "4": "15 000 - 19 999 kr",
+            "5": "20 000 - 24 999 kr",
+            "6": "25 000 - 29 999 kr",
+            "7": "30 000 - 34 999 kr",
+            "8": "35 000 - 39 999 kr",
+            "9": "40 000 - 44 999 kr",
+            "10": "45 000 - 49 999 kr",
+            "11": "50 000 kr eller mer"
+          },
+          "note": {
+            "0": [
+              "Om 'Totalt' väljs redovisas nettototalen för alla, vilket innebär att varje person bara räknas en gång. Totaluppgifter i tabellerna svarar mot summan av samtliga värden som är möjliga att välja för en delpopulation eller en redovisningsgrupp. Totalen innebär alltså inte en summering av valda värden."
+            ]
+          }
+        },
+        "note": [
+          "Skuldstorlek redovisat i intervall."
+        ],
+        "extension": {
+          "elimination": true,
+          "eliminationValueCode": "0",
+          "show": "value",
+          "position": 1
+        }
+      },
+      "Skuldberäkningsdatum": {
+        "label": "Skuldberäkningsdatum",
+        "category": {
+          "index": {
+            "0": 0,
+            "1": 1,
+            "2": 2,
+            "3": 3,
+            "4": 4,
+            "5": 5,
+            "6": 6,
+            "7": 7,
+            "8": 8,
+            "9": 9,
+            "10": 10,
+            "11": 11,
+            "12": 12,
+            "13": 13,
+            "14": 14,
+            "15": 15,
+            "16": 16,
+            "17": 17
+          },
+          "label": {
+            "0": "2009-01-01",
+            "1": "2010-01-01",
+            "2": "2011-01-01",
+            "3": "2012-01-01",
+            "4": "2013-01-01",
+            "5": "2014-01-01",
+            "6": "2015-01-01",
+            "7": "2016-01-01",
+            "8": "2017-01-01",
+            "9": "2018-01-01",
+            "10": "2019-01-01",
+            "11": "2020-01-01",
+            "12": "2021-01-01",
+            "13": "2022-01-01",
+            "14": "2023-01-01",
+            "15": "2024-01-01",
+            "16": "2025-01-01",
+            "17": "2026-01-01"
+          },
+          "note": {
+            "0": [
+              "Enstaka personer som saknar uppgift om könstillhörighet ingår inte i statistiken."
+            ]
+          }
+        },
+        "note": [
+          "Det skuldberäkningsdatum som avses."
+        ],
+        "extension": {
+          "elimination": false,
+          "show": "value",
+          "position": 2
+        }
+      },
+      "Kön": {
+        "label": "Kön",
+        "category": {
+          "index": {
+            "0": 0,
+            "1": 1,
+            "2": 2
+          },
+          "label": {
+            "0": "Kvinnor",
+            "1": "Män",
+            "2": "Totalt"
+          }
+        },
+        "note": [
+          "Med kön avses det juridiska könet. Personer som har bytt juridiskt kön under tidsperioden kan förekomma i båda könskategorierna."
+        ],
+        "extension": {
+          "elimination": true,
+          "show": "value",
+          "position": 3
+        }
+      },
+      "Antal personer, Ingående skuld": {
+        "label": "Antal personer, Ingående skuld",
+        "category": {
+          "index": {
+            "0": 0,
+            "1": 1
+          },
+          "label": {
+            "0": "Antal personer",
+            "1": "Belopp (MSEK)"
+          },
+          "note": {
+            "0": [
+              "Antal personer. Vid en fördelning på flera olika variabler kan personen vanligen förekomma på fler än ett ställe. Alla totaler är nettoräknade, vilket innebär att varje person bara räknas en gång. Tabellen har sekretessgranskats, vilket innebär att enskilda celler med antal färre än 3 har ersatts med dubbelprick '..'."
+            ],
+            "1": [
+              "Ingående skuld i miljoner kronor. I databasen är det möjligt att välja 1-6 decimaler. Notera att det val av decimaler som görs följer med vid export till andra program, vilket innebär att underliggande decimaler inte redovisas. På grund av avrundningar kan det uppstå differenser mellan totalsumman och delsummorna vid en sammanräkning."
+            ]
+          }
+        },
+        "extension": {
+          "elimination": false,
+          "show": "value",
+          "position": 4
+        }
+      }
+    },
+    "official_statistics": true,
+    "source": "Centrala studiestödsnämnden, CSN.",
+    "note": [
+      "Fotnoter med tabellförklaringar visas längst ned under rubriken 'Fotnoter'.",
+      "Tabellen visar antalet personer med återkrav och återkravsbeloppet vid respektive skuldberäkningstillfälle. Återkrav är ett beslut om att återbetala ett belopp man inte haft rätt till och därför blivit direkt återbetalningsskyldig för. Personer vars hela skuld omfattas av skuldsanering ingår inte i statistiken. För mer information om regelverket, se csn.se."
+    ],
+    "metadata_url": "https://statistik.csn.se/PXWeb/api/v1/sv/CSNstat/AB/AK/ABAKD11.px",
+    "extension": {
+      "px": {
+        "decimals": 0,
+        "official-statistics": true,
+        "aggregallowed": true,
+        "language": "sv",
+        "matrix": "ABAKD11",
+        "subject-code": "Återbetalning"
+      }
+    },
+    "paths": [
+      {
+        "path": [
+          {
+            "code": "AB",
+            "label": "Studieskulder och inbetalning av studiestöd"
+          },
+          {
+            "code": "AK",
+            "label": "Återkrav av studiestöd"
+          }
+        ]
+      }
+    ],
+    "subject": {
+      "code": "Återbetalning",
+      "label": "Återkrav av studiestöd"
+    },
+    "retrieval": {
+      "type": "pxweb_v1",
+      "config": {
+        "data_url": "https://statistik.csn.se/PXWeb/api/v1/sv/CSNstat/AB/AK/ABAKD11.px"
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+"""Kolada provider adapter."""

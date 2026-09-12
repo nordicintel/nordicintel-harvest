@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nordicintel/nordicintel-schemas/v1.0.0/schemas/harvest-config.schema.json",
+  "title": "Stored provider harvest configuration",
+  "type": "object",
+  "properties": {
+    "adapter": {
+      "enum": [
+        "pxweb_v1",
+        "pxweb_v2",
+        "kolada"
+      ]
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "sv",
+          "en"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "rate_limit": {
+      "$ref": "#/$defs/rate_limit"
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "adapter",
+    "languages",
+    "rate_limit",
+    "config"
+  ],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "adapter": {
+          "const": "pxweb_v1"
+        },
+        "config": {
+          "$ref": "adapters/pxweb_v1.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "adapter": {
+          "const": "pxweb_v2"
+        },
+        "config": {
+          "$ref": "adapters/pxweb_v2.schema.json"
+        }
+      }
+    },
+    {
+      "properties": {
+        "adapter": {
+          "const": "kolada"
+        },
+        "config": {
+          "$ref": "adapters/kolada.schema.json"
+        }
+      }
+    }
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "adapter": {
+            "const": "kolada"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "languages": {
+            "items": {
+              "const": "sv"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "rate_limit": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Minimum seconds between request starts, including concurrent requests within the execution. Zero means no added delay."
+    }
+  }
+}

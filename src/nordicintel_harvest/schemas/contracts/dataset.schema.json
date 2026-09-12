@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nordicintel/nordicintel-schemas/v1.0.0/schemas/dataset.schema.json",
+  "title": "Dataset",
+  "description": "Basic catalog information for one dataset language version.",
+  "type": "object",
+  "required": [
+    "identity",
+    "label"
+  ],
+  "properties": {
+    "identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "label": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "description": {
+      "type": "string"
+    },
+    "updated": {
+      "$ref": "#/$defs/dateOrTimestamp"
+    },
+    "next_release": {
+      "$ref": "#/$defs/dateOrTimestamp"
+    },
+    "time_unit": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "first_period": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "last_period": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "discontinued": {
+      "type": "boolean",
+      "description": "Omission means unknown."
+    },
+    "source_url": {
+      "$ref": "#/$defs/url"
+    },
+    "doc_url": {
+      "$ref": "#/$defs/url"
+    },
+    "extension": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "identity": {
+      "description": "Provider and dataset codes identify the dataset; language identifies its metadata variant.",
+      "type": "object",
+      "required": [
+        "provider_code",
+        "dataset_code",
+        "language"
+      ],
+      "properties": {
+        "provider_code": {
+          "$ref": "provider.schema.json#/properties/code"
+        },
+        "dataset_code": {
+          "type": "string",
+          "pattern": "\\S",
+          "description": "Opaque, case-sensitive code, unique within the provider. Preserve without normalization across languages."
+        },
+        "language": {
+          "enum": [
+            "sv",
+            "en"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "dateOrTimestamp": {
+      "type": "string",
+      "anyOf": [
+        {
+          "format": "date"
+        },
+        {
+          "format": "date-time"
+        }
+      ]
+    },
+    "url": {
+      "description": "Absolute HTTP(S) URL with a host.",
+      "$ref": "provider.schema.json#/properties/website"
+    }
+  }
+}
