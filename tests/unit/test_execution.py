@@ -139,7 +139,7 @@ async def hanging(*args, **kwargs):
 async def test_cancellation_stops_work_and_completes():
     client = Client(cancel=True)
     await asyncio.wait_for(run_job(client, claimed(), asyncio.Event(), execute_fn=hanging), 1)
-    assert client.completed == [{"listing_complete": False, "error": None}]
+    assert client.completed == [{"listing_complete": False, "error": None, "discovered": 0}]
 
 
 async def test_worker_stop_and_repeated_signal_have_one_finalization():

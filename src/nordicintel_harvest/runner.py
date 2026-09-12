@@ -100,8 +100,10 @@ async def execute(
             tasks.add(asyncio.create_task(resolve(selection)))
             if len(tasks) >= concurrency:
                 done, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-                for task in done:
-                    task.result()
+                results = await asyncio.gather(*done, return_exceptions=True)
+                for result in results:
+                    if isinstance(result, BaseException):
+                        raise result
             if limit is not None and progress.attempts >= limit:
                 break
         else:

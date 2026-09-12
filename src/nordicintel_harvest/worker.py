@@ -120,6 +120,7 @@ async def run_job(
                         and task.done()
                         and not task.cancelled(),
                         "error": error,
+                        "discovered": progress.discovered,
                     },
                 )
         except Exception as exc:
