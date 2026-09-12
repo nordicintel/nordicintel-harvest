@@ -83,10 +83,10 @@ worker: nordicintel-harvest worker
 
 Develop on main; CI runs lint, formatting, tests and wheel installation with
 read-only permissions. Deploy the catalog migration/interface first, then this
-worker. Initial worker deployment uses `git push heroku main` after GitHub checks
-pass. Automatic GitHub deployment is not yet configured on the worker app; choose
-main and enable wait-for-checks in its Heroku deployment settings when available.
-The catalog already uses that configuration.
+worker. Both apps automatically deploy from GitHub `main` after checks pass. The worker
+connection and checked wait-for-checks setting were verified in the Heroku
+dashboard. Initial deployment used `git push heroku main`; subsequent pushes use
+the GitHub integration.
 
 ```sh
 uv run ruff check .
@@ -101,3 +101,5 @@ For diagnosis, inspect catalog job error and per-dataset outcomes first, then
 requires a fresh explicit request. Do not run a local worker against the hosted
 catalog during manual claim tests. Durable records survive process replacement.
 Observation retrieval/storage, scheduling and public PxWeb responses remain future work.
+
+Hosted verification: [all-provider results and lifecycle checks](docs/hosted-acceptance.md).
