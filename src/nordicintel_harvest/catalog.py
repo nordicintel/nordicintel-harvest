@@ -31,10 +31,14 @@ class CatalogClient:
                 ) as response:
                     if response.status == 204:
                         return None
-                    payload = await response.json(content_type=None)
                     if response.status >= 400:
+                        try:
+                            payload = await response.json(content_type=None)
+                        except ValueError:
+                            payload = {}  # Heroku/proxies may return an HTML error page.
                         error = payload.get("error", {}) if isinstance(payload, dict) else {}
                         raise CatalogError(response.status, error.get("message", "request failed"))
+                    payload = await response.json(content_type=None)
                     return payload
             except (aiohttp.ClientError, TimeoutError, CatalogError) as exc:
                 if isinstance(exc, CatalogError) and exc.status not in (429, 500, 502, 503, 504):
