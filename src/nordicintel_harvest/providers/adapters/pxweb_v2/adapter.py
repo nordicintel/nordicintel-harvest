@@ -120,7 +120,7 @@ class PxWebV2Adapter(ProviderAdapter):
                 self.language,
                 page_number,
             )
-            return [], page_number, page_number
+            raise RuntimeError("PXWeb v2 discovery request failed; listing is incomplete")
 
     async def _api_table_to_discovered_dataset(
         self, table: dict[str, Any]

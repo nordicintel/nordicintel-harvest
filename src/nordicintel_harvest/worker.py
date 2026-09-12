@@ -138,9 +138,23 @@ async def worker(client, stop, *, concurrency=5, poll_seconds=5):
             started = time.monotonic()
             # Do not replay an ambiguous claim: an accepted response might have been
             # lost. Its lease will expire; blindly claiming again could orphan work.
-            claimed = await client.request(
-                "POST", "/v1/harvests/claim", body={"worker_id": worker_id}, retry=False
+            claim_task = asyncio.create_task(
+                client.request(
+                    "POST", "/v1/harvests/claim", body={"worker_id": worker_id}, retry=False
+                )
             )
+            stop_task = asyncio.create_task(stop.wait())
+            try:
+                done, _ = await asyncio.wait(
+                    [claim_task, stop_task], return_when=asyncio.FIRST_COMPLETED
+                )
+                if stop_task in done:
+                    return  # an ambiguous accepted claim expires durably
+                claimed = claim_task.result()
+            finally:
+                claim_task.cancel()
+                stop_task.cancel()
+                await asyncio.gather(claim_task, stop_task, return_exceptions=True)
             if claimed:
                 await run_job(client, claimed, stop, concurrency=concurrency, claim_started=started)
                 continue
