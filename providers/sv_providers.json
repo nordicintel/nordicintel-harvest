@@ -1,0 +1,525 @@
+[
+  {
+    "code": "scb",
+    "label": {
+      "sv": "Statistiska centralbyrån"
+    },
+    "website": "https://www.scb.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v2",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 0.4,
+        "config": {
+          "base_api_url": "https://statistikdatabasen.scb.se/api/v2",
+          "base_web_url": "https://pxweb2.pages.dev"
+        }
+      }
+    ]
+  },
+  {
+    "code": "kolada",
+    "label": {
+      "sv": "Kolada"
+    },
+    "website": "https://kolada.se/",
+    "harvest": [
+      {
+        "adapter": "kolada",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 0.35,
+        "config": {
+          "base_web_url": "https://kolada.se"
+        }
+      }
+    ]
+  },
+  {
+    "code": "csn",
+    "label": {
+      "sv": "Centrala studiestödsnämnden (CSN)"
+    },
+    "website": "https://www.csn.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 2,
+        "config": {
+          "base_api_url": "https://statistik.csn.se/PXWeb/api/v1",
+          "database_ids": [
+            "CSNstat"
+          ],
+          "base_web_url": "https://statistik.csn.se/PxWeb/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "energi",
+    "label": {
+      "sv": "Energimyndigheten"
+    },
+    "website": "https://www.energimyndigheten.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 1.3,
+        "config": {
+          "base_api_url": "https://pxexternal.energimyndigheten.se/api/v1",
+          "database_ids": [
+            "Energimyndighetens_statistikdatabas"
+          ],
+          "base_web_url": "https://pxexternal.energimyndigheten.se/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "fohm",
+    "label": {
+      "sv": "Folkhälsomyndigheten"
+    },
+    "website": "https://www.folkhalsomyndigheten.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 0.35,
+        "config": {
+          "base_api_url": "https://fohm-app.folkhalsomyndigheten.se/Folkhalsodata/api/v1",
+          "database_ids": [
+            "A_Folkhalsodata"
+          ],
+          "base_web_url": "https://fohm-app.folkhalsomyndigheten.se/Folkhalsodata/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "sjv",
+    "label": {
+      "sv": "Statens jordbruksverk"
+    },
+    "website": "https://www.jordbruksverket.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 0.5,
+        "config": {
+          "base_api_url": "https://statistik.sjv.se/PXWeb/api/v1",
+          "database_ids": [
+            "Jordbruksverkets%20statistikdatabas"
+          ],
+          "base_web_url": "https://statistik.sjv.se/PXWeb/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "konj",
+    "label": {
+      "sv": "Konjunkturinstitutet",
+      "en": "National Institute of Economic Research"
+    },
+    "website": "https://www.konj.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 1.25,
+        "label": {
+          "sv": "Prognosdatabasen",
+          "en": "The Forecast Database"
+        },
+        "config": {
+          "base_api_url": "https://prognos.konj.se/PxWeb/api/v1",
+          "base_web_url": "https://prognos.konj.se/PxWeb/pxweb",
+          "database_ids": [
+            "SenastePrognosen",
+            "UrvalAvVariabler",
+            "XLangtidsscenario"
+          ]
+        }
+      },
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 1.25,
+        "label": {
+          "sv": "Konjunkturbarometern",
+          "en": "Economic Tendency Survey"
+        },
+        "config": {
+          "base_api_url": "https://statistik.konj.se/PxWeb/api/v1",
+          "base_web_url": "https://statistik.konj.se/PxWeb/pxweb",
+          "database_ids": [
+            "KonjBar"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "lansstyr",
+    "label": {
+      "sv": "Länsstyrelsernas statistikdatabas"
+    },
+    "website": "https://www.lansstyrelsen.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://pxweb.lansstyrelsen.se/api/v1",
+          "database_ids": [
+            "Miljotillstandet_i_skogslandskapet"
+          ],
+          "base_web_url": "https://pxweb.lansstyrelsen.se/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "mcf",
+    "label": {
+      "sv": "MCF (Myndigheten för civil beredskap)",
+      "en": "MCF (Swedish Civil Contingencies Agency)"
+    },
+    "description": {
+      "sv": "Statistik för bränder och olyckor.\nEn tjänst från Myndigheten för civilt försvar med syfte att tillgängliggöra statistik om bränder och andra olyckor.",
+      "en": "Fire and Accident Statistics.\nA service from the Swedish Civil Defence and Resilience Agency with the aim of making statistics on fires and other accidents accessible."
+    },
+    "website": "https://www.msb.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 2,
+        "config": {
+          "base_api_url": "https://statistik.mcf.se/PXWeb/api/v1",
+          "database_ids": [
+            "PxData"
+          ],
+          "base_web_url": "https://statistik.mcf.se/PXWeb/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "slu",
+    "label": {
+      "sv": "SLU Riksskogstaxeringen"
+    },
+    "website": "https://www.slu.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://skogsstatistik.slu.se/api/v1",
+          "database_ids": [
+            "OffStat"
+          ],
+          "base_web_url": "https://skogsstatistik.slu.se/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "skog",
+    "label": {
+      "sv": "Skogsstyrelsen"
+    },
+    "website": "https://www.skogsstyrelsen.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 2.8,
+        "config": {
+          "base_api_url": "https://pxweb.skogsstyrelsen.se/api/v1",
+          "database_ids": [
+            "Skogsstyrelsens%20statistikdatabas"
+          ],
+          "base_web_url": "https://pxweb.skogsstyrelsen.se/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "domstol",
+    "label": {
+      "sv": "Domstolsverket"
+    },
+    "website": "https://www.domstol.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv",
+          "en"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://pxweb.etjanst.domstol.se/PxWeb/api/v1",
+          "database_ids": [
+            "DOMstat"
+          ],
+          "base_web_url": "https://pxweb.etjanst.domstol.se/PxWeb/pxweb"
+        }
+      }
+    ]
+  },
+  {
+    "code": "linkoping",
+    "label": {
+      "sv": "Linköpings kommun",
+      "en": "Linköping Municipality"
+    },
+    "website": "https://www.linkoping.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://statistik.linkoping.se/pxweb/api/v1",
+          "base_web_url": "https://statistik.linkoping.se/pxweb/pxweb",
+          "database_ids": [
+            "Basomraden",
+            "Delomraden",
+            "Enkater",
+            "GeoUtskott",
+            "Linkoping",
+            "Omvarld",
+            "Om_mig",
+            "RegSO",
+            "Samlad_planering",
+            "Skolkvalitet",
+            "Sureg14",
+            "SuregSoc"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "kulturanalys",
+    "label": {
+      "sv": "Myndigheten för kulturanalys",
+      "en": "Swedish Agency for Cultural Policy Analysis"
+    },
+    "website": "https://kulturanalys.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://statistik.kulturanalys.se/api/v1",
+          "base_web_url": "https://statistik.kulturanalys.se/pxweb",
+          "database_ids": [
+            "Statistikdatabas"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "ehm",
+    "label": {
+      "sv": "E-hälsomyndigheten",
+      "en": "Swedish eHealth Agency"
+    },
+    "website": "https://www.ehalsomyndigheten.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://statistik.ehalsomyndigheten.se/api/v1",
+          "base_web_url": "https://statistik.ehalsomyndigheten.se/pxweb",
+          "database_ids": [
+            "Detaljhandel%20med%20l%C3%A4kemedel",
+            "L%C3%A4kemedelsprisindex"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "tillvaxtanalys",
+    "label": {
+      "sv": "Tillväxtanalys",
+      "en": "Swedish Agency for Growth Policy Analysis"
+    },
+    "website": "https://www.tillvaxtanalys.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://statistik.tillvaxtanalys.se/PxWeb/api/v1",
+          "base_web_url": "https://statistik.tillvaxtanalys.se/PxWeb/pxweb",
+          "database_ids": [
+            "Tillv%C3%A4xtanalys%20statistikdatabas"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "vgregion",
+    "label": {
+      "sv": "Västra Götalandsregionen",
+      "en": "Region Västra Götaland"
+    },
+    "website": "https://www.vgregion.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://pxweb2022.vgregion.se/Pxwebb/api/v1",
+          "base_web_url": "https://pxweb2022.vgregion.se/Pxwebb/pxweb",
+          "database_ids": [
+            "Arbetsmarknad%20och%20N%C3%A4ringsliv",
+            "Demografi",
+            "Folkh%C3%A4lsoenk%C3%A4ten%20%28H%C3%A4lsa%20p%C3%A5%20lika%20villkor%29",
+            "Gr%C3%A4nsregional%20statistik%20Norge-Sverige",
+            "Personalstatistik%20V%C3%A4stra%20G%C3%B6talandsregionen"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "vasteras",
+    "label": {
+      "sv": "Västerås stad",
+      "en": "City of Västerås"
+    },
+    "website": "https://www.vasteras.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://statistik.vasteras.se/api/v1",
+          "base_web_url": "https://statistik.vasteras.se/pxweb",
+          "database_ids": [
+            "Arbetsmarknad",
+            "Befolkning",
+            "Befolkningsprognos",
+            "Bost%C3%A4der%20och%20byggande",
+            "Dolda%20tabeller",
+            "Inkomster",
+            "Oh%C3%A4lsa",
+            "Utbildning"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "sundsvall",
+    "label": {
+      "sv": "Sundsvalls kommun",
+      "en": "Sundsvall Municipality"
+    },
+    "website": "https://sundsvall.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://m02-http-pxwebb.login.sundsvall.se/PXWeb_Ext/api/v1",
+          "base_web_url": "https://m02-http-pxwebb.login.sundsvall.se/PXWeb_Ext/pxweb",
+          "database_ids": [
+            "Sundsvalls_statistikdatabas"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "code": "skolverket",
+    "label": {
+      "sv": "Skolverket",
+      "en": "Swedish National Agency for Education"
+    },
+    "website": "https://www.skolverket.se/",
+    "harvest": [
+      {
+        "adapter": "pxweb_v1",
+        "languages": [
+          "sv"
+        ],
+        "rate_limit": 1.25,
+        "config": {
+          "base_api_url": "https://statistikdatabasen.skolverket.se/PxWeb/api/v1",
+          "base_web_url": "https://statistikdatabasen.skolverket.se/PxWeb/pxweb",
+          "database_ids": [
+            "Skolverkets_statistikdatabas"
+          ]
+        }
+      }
+    ]
+  }
+]
